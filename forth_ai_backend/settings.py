@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # apps
+    'forth_ai_backend.apps.posts',
+
 ]
 
 MIDDLEWARE = [
