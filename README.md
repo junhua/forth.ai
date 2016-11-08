@@ -16,7 +16,7 @@
 `eval $(docker-machine env dev)`
 
 1. Run compose
-`docker-compose build`
+`docker-compose build` then 
 `docker-compose up -d`
 
 1. Check ip
