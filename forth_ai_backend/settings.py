@@ -35,27 +35,36 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
+    # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
     # third party
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+
+
+    # third party
+    'corsheaders',
     'allauth',
     'allauth.account',
+    'rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.github',
 
 
-
     # apps
     'forth_ai_backend.apps.posts',
+    'forth_ai_backend.oauth'
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -147,3 +156,38 @@ AUTHENTICATION_BACKENDS = (
 )
 
 SITE_ID = 1
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Django-rest-framework
+# http://www.django-rest-framework.org/
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    )
+}
+
+# django-cors-headers
+# https://github.com/ottoyiu/django-cors-headers
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+# django-allauth Configuration 
+# http://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# ACCOUNT_TEMPLATE_EXTENSION = 'json'
+# ACCOUNT_LOGIN_REDIRECT_URL = '/account/login/'
+# ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
+# LOGIN_REDIRECT_URL = 'https://www.baidu.com'
+
+# django-rest-auth
+# http://django-rest-auth.readthedocs.io/en/latest/
+REST_USE_JWT = True
+REST_SESSION_LOGIN = False
