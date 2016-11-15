@@ -1,3 +1,4 @@
+.DS_Store
 .venv
 forth_ai_backend/fixtures
 *.pyc
