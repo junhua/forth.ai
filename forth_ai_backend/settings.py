@@ -25,7 +25,7 @@ SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.99.101', '192.168.99.100', 'localhost']
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'corsheaders',
+
     # third party
     'allauth',
     'allauth.account',
@@ -46,10 +48,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.github',
 
-
+    'rest_framework',
+    # 'django-filter',
 
     # apps
-    'forth_ai_backend.apps.posts',
+    'api',
+    'apps.posts',
+
 
 ]
 
@@ -61,6 +66,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 
@@ -147,3 +154,5 @@ AUTHENTICATION_BACKENDS = (
 )
 
 SITE_ID = 1
+
+STATIC_ROOT = '/static/'
