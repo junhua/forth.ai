@@ -25,7 +25,7 @@ SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.99.100', 'localhost']
+ALLOWED_HOSTS = ['192.168.99.100', 'localhost','10.2.11.127']
 
 
 # Application definition
@@ -185,7 +185,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 # ACCOUNT_TEMPLATE_EXTENSION = 'json'
 # ACCOUNT_LOGIN_REDIRECT_URL = '/account/login/'
 # ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
-# LOGIN_REDIRECT_URL = 'https://www.baidu.com'
+LOGIN_REDIRECT_URL = '/user/'
 
 # django-rest-auth
 # http://django-rest-auth.readthedocs.io/en/latest/
