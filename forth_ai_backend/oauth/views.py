@@ -20,8 +20,16 @@ def detail(request):
 	user = request.user
 	provider = str(SocialAccount.objects.filter(user = user)[0].provider)
 	access =  str(SocialToken.objects.filter(account__user = user)[0])
+
 	if provider == 'facebook':
 		url = 'http://localhost:3001/facebook/login?access=%s & provider=%s'%(access, provider)
 	elif provider == 'github':
 		url = 'http://localhost:3001/github/login?access=%s & provider=%s'%(access, provider)
-	return HttpResponseRedirect(url)
+
+	response = HttpResponseRedirect(url)
+	response.set_cookie('provider', provider)
+	response.set_cookie('access', access)
+	response['provider'] = provider
+	response['access'] = access
+
+	return response
