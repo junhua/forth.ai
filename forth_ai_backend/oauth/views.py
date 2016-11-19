@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
+from rest_framework.permissions import IsAdminUser
 
-from rest_auth.registration.views import SocialLoginView
+from rest_auth.registration.views import SocialLoginView, RegisterView
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -19,8 +20,8 @@ class GithubLogin(SocialLoginView):
     client_class = OAuth2Client
     callback_url = 'localhost:3001'
 
-class CreateUser(SocialLoginView):
-	pass
+class CreateUser(RegisterView):
+	permission_classes = (IsAdminUser, )
 
 
 def login_token(provider, access):
@@ -42,4 +43,5 @@ def detail(request):
 
 	response = HttpResponseRedirect(url, detail['token'])
 	# token is response.content
+	print response.content
 	return response
