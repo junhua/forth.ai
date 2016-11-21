@@ -11,3 +11,14 @@
        - "8000:8000"
      depends_on:
        - db
+  # nginx:
+  #    build: ./nginx/
+  #    ports:
+  #      - "80:80"
+  #    volumes:
+  #      - /www/static
+  #    volumes_from:
+  #      - web
+  #    links:
+  #      - web:web
+
