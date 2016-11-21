@@ -12,7 +12,7 @@ class RepostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('date_created', 'type', 'themes', 'keywords', 'content',
+        fields = ('id', 'date_created', 'type', 'themes', 'keywords', 'content',
                   # 'owner'
                   )
 
