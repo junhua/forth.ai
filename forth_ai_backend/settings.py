@@ -26,8 +26,8 @@ SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
+#SESSION_COOKIE_DOMAIN = ".localhost.com" #Social Network Login Failure
+SESSION_COOKIE_DOMAIN=".test.com"
 
 # Application definition
 

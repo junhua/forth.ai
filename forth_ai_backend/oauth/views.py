@@ -12,8 +12,6 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialToken, SocialAccount
 
 import requests, json
-import Cookie
-import random
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
@@ -44,19 +42,14 @@ def login_token(provider, access):
 
 
 def detail(request):
-	cookie = Cookie.SimpleCookie()
 	user = request.user
 	provider = str(SocialAccount.objects.filter(user = user)[0].provider)
 	access =  str(SocialToken.objects.filter(account__user = user)[0])
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail['token']
-	url = 'http://www.baidu:3001?jwt=%s'%jwt
+	url = 'http://www.baidu.com?jwt=%s'%jwt
 	response = HttpResponseRedirect(url, jwt)
-	response.set_cookie('jwt', value = jwt, domain = '.localhost')
-	print '?????response---------------',response.cookies
-	cookie["session"] = 111
-	cookie["session"]["domain"] = ".localhost.com"
-	print cookie.output()
-	# token is response.content
+	response.set_cookie('jwt', value = jwt, domain = '.test.com')
+
 	return response
