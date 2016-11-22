@@ -50,6 +50,6 @@ def detail(request):
 	jwt = detail['token']
 	url = 'http://www.baidu.com?jwt=%s'%jwt
 	response = HttpResponseRedirect(url, jwt)
-	response.set_cookie('jwt', value = jwt, domain = '.test.com')
+	response.set_cookie('jwt', value = jwt, domain = '.uiplay.cn')
 
 	return response

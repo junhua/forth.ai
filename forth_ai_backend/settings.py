@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 #SESSION_COOKIE_DOMAIN = ".localhost.com" #Social Network Login Failure
-SESSION_COOKIE_DOMAIN=".test.com"
+SESSION_COOKIE_DOMAIN=".uiplay.cn"
 
 # Application definition
 
