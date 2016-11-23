@@ -25,7 +25,12 @@ SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.99.101', '192.168.99.100', 'localhost']
+# ALLOWED_HOSTS = ['192.168.99.101', '192.168.99.100', 'localhost', '']
+
+
+ALLOWED_HOSTS = ['*']
+# SESSION_COOKIE_DOMAIN = ".localhost.com" #Social Network Login Failure
+SESSION_COOKIE_DOMAIN=".uiplay.cn"
 
 
 # Application definition
@@ -173,7 +178,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     )
@@ -193,7 +198,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 # ACCOUNT_TEMPLATE_EXTENSION = 'json'
 # ACCOUNT_LOGIN_REDIRECT_URL = '/account/login/'
 # ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
-# LOGIN_REDIRECT_URL = 'https://www.baidu.com'
+LOGIN_REDIRECT_URL = '/user/'
 
 # django-rest-auth
 # http://django-rest-auth.readthedocs.io/en/latest/
