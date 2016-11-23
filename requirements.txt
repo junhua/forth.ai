@@ -11,3 +11,5 @@ python-openid==2.2.5
 requests==2.11.1
 requests-oauthlib==0.7.0
 six==1.10.0
+django-filter==1.0.0
+markdown==2.6.7

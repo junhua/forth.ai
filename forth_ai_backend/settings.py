@@ -25,7 +25,7 @@ SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.99.100', 'localhost']
+ALLOWED_HOSTS = ['192.168.99.101', '192.168.99.100', 'localhost']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+
 
     # third party
     'rest_framework',
@@ -56,8 +57,12 @@ INSTALLED_APPS = [
 
 
     # apps
-    'forth_ai_backend.apps.posts',
+    'api',
+    'apps.posts',
     'forth_ai_backend.oauth'
+    # 'django-filter',
+    
+
 
 ]
 
@@ -70,6 +75,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 
@@ -156,6 +163,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 SITE_ID = 1
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Django-rest-framework
@@ -191,3 +199,6 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 # http://django-rest-auth.readthedocs.io/en/latest/
 REST_USE_JWT = True
 REST_SESSION_LOGIN = False
+
+
+STATIC_ROOT = '/static/'
