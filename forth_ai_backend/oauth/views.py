@@ -33,7 +33,7 @@ class CreateUser(RegisterView):
 
 
 def login_token(provider, access):
-	url = 'http://localhost:8000/rest-auth/%s/' % provider
+	url = 'http://pqapi.uiplay.cn/rest-auth/%s/' % provider
 	data = {
 		"access_token": access
 	}
@@ -48,7 +48,7 @@ def detail(request):
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail['token']
-	url = 'http://www.baidu.com?jwt=%s'%jwt
+	url = 'http://pqweb.uiplay.cn/%s/login' % provider
 	response = HttpResponseRedirect(url, jwt)
 	response.set_cookie('jwt', value = jwt, domain = '.uiplay.cn')
 
