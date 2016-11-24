@@ -22,6 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '=+51si(i4cz*4+tzz6wh8qpr!km@@vs=7cv0aa=&q$6rc=l(i2'
 
+BACKEND_BASE_URL = os.environ['BACKEND_BASE_URL']
+FRONTEND_BASE_URL = os.environ['FRONTEND_BASE_URL']
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

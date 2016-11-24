@@ -12,6 +12,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialToken, SocialAccount
 
 import requests, json
+from django.conf import settings
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
@@ -33,7 +34,7 @@ class CreateUser(RegisterView):
 
 
 def login_token(provider, access):
-	url = 'http://pqapi.uiplay.cn/rest-auth/%s/' % provider
+	url = '%s/rest-auth/%s/' %(settings.BACKEND_BASE_URL, provider)
 	data = {
 		"access_token": access
 	}
@@ -48,7 +49,7 @@ def detail(request):
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail['token']
-	url = 'http://pqweb.uiplay.cn/%s/login' % provider
+	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
 	response = HttpResponseRedirect(url, jwt)
 	response.set_cookie('jwt', value = jwt, domain = '.uiplay.cn')
 
