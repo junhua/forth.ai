@@ -34,29 +34,23 @@ class CreateUser(RegisterView):
 
 
 def login_token(provider, access):
-	print '????????'
 	url = '%s/rest-auth/%s/' %(settings.BACKEND_BASE_URL, provider)
-	print '******************', url
 	data = {
 		"access_token": access
 	}
 	response = requests.post(url,data)
-	print "^^^^^^^^^^^^^^", response.content
 	return response.content
 
 
 def detail(request):
 	user = request.user
-	print "???????????????", request.user
 	provider = str(SocialAccount.objects.filter(user = user)[0].provider)
 	access =  str(SocialToken.objects.filter(account__user = user)[0])
-	print "-----------", provider, access
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail['token']
 	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
-	print "============", url
 	response = HttpResponseRedirect(url, jwt)
-	response.set_cookie('jwt', value = jwt, domain = settings.SESSION_COOKIE_DOMAIN)# set  env!!!
+	response.set_cookie('jwt', value = jwt, domain = '.uiplay.cn')
 
 	return response
