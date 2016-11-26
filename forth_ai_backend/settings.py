@@ -33,7 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 # SESSION_COOKIE_DOMAIN = ".localhost.com" #Social Network Login Failure
-SESSION_COOKIE_DOMAIN=".uiplay.cn"
+SESSION_COOKIE_DOMAIN=os.environ['SESSION_COOKIE_DOMAIN']
 
 
 # Application definition
