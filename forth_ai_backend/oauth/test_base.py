@@ -60,6 +60,8 @@ class BaseAPITestCase(object):
 
     def post(self, *args, **kwargs):
         return self.send_request('post', *args, **kwargs)
+    def get(self, *args, **kwargs):
+        return self.send_request('get', *args, **kwargs)
     
     def _login(self):
         data = {
