@@ -29,73 +29,73 @@ try:
 except ImportError:
     from urlparse import urlparse, parse_qs
 
-class EmailRegisterTests(TestCase, test_base.BaseAPITestCase):
-	PASS = 'thisispass'
-	EMAIL = "person1@world.com"
-	REGISTRATION_DATA = {
-		'email': EMAIL,
-		'password1':PASS,
-		'password2':PASS
-	}
+# class EmailRegisterTests(TestCase, test_base.BaseAPITestCase):
+# 	PASS = 'thisispass'
+# 	EMAIL = "person1@world.com"
+# 	REGISTRATION_DATA = {
+# 		'email': EMAIL,
+# 		'password1':PASS,
+# 		'password2':PASS
+# 	}
 
 
-	def setUp(self):
-		self.init()
+# 	def setUp(self):
+# 		self.init()
 
 
-	def test_registration(self):
-		user_count = get_user_model().objects.all().count()
-		result = self.post(self.register_url, 
-			            data = self.REGISTRATION_DATA,
-			            status_code = 201)
-		new_user = get_user_model().objects.latest('id')
-		self.assertEqual(get_user_model().objects.all().count(), user_count + 1)
-		self.assertEqual(new_user.email, self.REGISTRATION_DATA['email'])
+# 	def test_registration(self):
+# 		user_count = get_user_model().objects.all().count()
+# 		result = self.post(self.register_url, 
+# 			            data = self.REGISTRATION_DATA,
+# 			            status_code = 201)
+# 		new_user = get_user_model().objects.latest('id')
+# 		self.assertEqual(get_user_model().objects.all().count(), user_count + 1)
+# 		self.assertEqual(new_user.email, self.REGISTRATION_DATA['email'])
 
-		self._login()
-		self._logout()
+# 		self._login()
+# 		self._logout()
 
-	def test_empty_data_registration(self):
-		#/rest-auth/registration/
-		self.post(self.register_url, data={}, status_code=400)
+# 	def test_empty_data_registration(self):
+# 		#/rest-auth/registration/
+# 		self.post(self.register_url, data={}, status_code=400)
 
-	def test_login_by_email(self):
-		data = {
-			"email": "test0@test.com",
-			"password" : "thisispass"
-		}
-		get_user_model().objects.create_user(username = " ",
-								email = data["email"],
-								password = data["password"]
-							    )
-		self.post(self.login_url, data=data, status_code=200)
-		self.assertIn( 'token', self.response.json.keys() )
+# 	def test_login_by_email(self):
+# 		data = {
+# 			"email": "test0@test.com",
+# 			"password" : "thisispass"
+# 		}
+# 		get_user_model().objects.create_user(username = " ",
+# 								email = data["email"],
+# 								password = data["password"]
+# 							    )
+# 		self.post(self.login_url, data=data, status_code=200)
+# 		self.assertIn( 'token', self.response.json.keys() )
 
-	@override_settings(ACCOUNT_LOGOUT_ON_GET=True)
-	def test_logout_on_get(self):
-		data = {
-			"email": "test@test.com",
-			"password": "thisispass"
-		}
-		get_user_model().objects.create_user(username = "test",
-								email = data["email"], 
-								password = data["password"]
-							    )
-		self.post(self.login_url, data = data, status_code=200)
-		self.get(self.logout_url, status=status.HTTP_200_OK)
+# 	@override_settings(ACCOUNT_LOGOUT_ON_GET=True)
+# 	def test_logout_on_get(self):
+# 		data = {
+# 			"email": "test@test.com",
+# 			"password": "thisispass"
+# 		}
+# 		get_user_model().objects.create_user(username = "test",
+# 								email = data["email"], 
+# 								password = data["password"]
+# 							    )
+# 		self.post(self.login_url, data = data, status_code=200)
+# 		self.get(self.logout_url, status=status.HTTP_200_OK)
 
-	@override_settings(ACCOUNT_LOGOUT_ON_GET=False)
-	def test_logout_on_post_only(self):
-		data = {
-			"email": "test1@test.com",
-			"password": "thisispass"
-		}
-		get_user_model().objects.create_user(username = "test",
-								email = data["email"],
-								password = data["password"]
-							    )
-		self.post(self.login_url, data=data, status_code=200)
-		self.get(self.logout_url, status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
+# 	@override_settings(ACCOUNT_LOGOUT_ON_GET=False)
+# 	def test_logout_on_post_only(self):
+# 		data = {
+# 			"email": "test1@test.com",
+# 			"password": "thisispass"
+# 		}
+# 		get_user_model().objects.create_user(username = "test",
+# 								email = data["email"],
+# 								password = data["password"]
+# 							    )
+# 		self.post(self.login_url, data=data, status_code=200)
+# 		self.get(self.logout_url, status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
@@ -205,7 +205,12 @@ class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
 	    
 	    p = urlparse(response['location'])
 	    q = parse_qs(p.query)
-	    complete_url = reverse(provider + '_callback')
+	    """{'scope': ['email'], 'state': ['3CIOVU8pUkh9'], 
+	    'redirect_uri': ['http://testserver/accounts/facebook/login/callback/'], 
+	    'response_type': ['code'], 'client_id': ['app123id_facebook']}
+	    """
+
+	    complete_url = reverse(provider + '_callback') # /accounts/provider/login/callback/
 	    self.assertGreater(q['redirect_uri'][0]
                            .find(complete_url), 0)
 	    response_json = self.get_login_response_json(
@@ -231,6 +236,7 @@ class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
 	def test_facebook_getlogin_access(self):
 		response = self.get_mocked_response()
 		login = self.login('facebook', response)
+		print 'login result:::', login
 		socialaccount = SocialAccount.objects.get(uid='630595557')
 		self.assertEqual(socialaccount.user.username, 'raymond.penners')
 		access =  str(SocialToken.objects.filter(
@@ -247,7 +253,20 @@ class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
 		access =  str(SocialToken.objects.filter(
 			account__user = socialaccount.user)[0]
 		)
-		self.assertEqual(access, 'testac') # get access
+		self.assertEqual(access, 'testac')
+
+	def test_login_social_twice(self): # login twice will not have error
+		gh_resp = self.get_mocked_response(data = self.github_data)
+		fb_resp = self.get_mocked_response()
+
+		fb_login = self.login('facebook', fb_resp)
+		gh_login = self.login('github', gh_resp)
+
+		self.assertEqual(fb_login.status_code, 302) 
+		self.assertEqual(gh_login.status_code, 302) 
+
+
+
 
 
 # python manage.py test forth_ai_backend
