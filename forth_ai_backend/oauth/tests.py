@@ -59,15 +59,43 @@ class EmailRegisterTests(TestCase, test_base.BaseAPITestCase):
 		#/rest-auth/registration/
 		self.post(self.register_url, data={}, status_code=400)
 
-	# @override_settings(ACCOUNT_LOGOUT_ON_GET=True)
-	# def test_logout_on_get(self):
-	# 	data = {
-	# 		""
-	# 	}
-	# 	get_user_model().objects.create_user(self.EMAIL, self.PASS)
-	# 	#self.post(self.login_url, data=data, status_code=status.HTTP_200_OK)
-	# 	print "????", self.get(self.logout_url, status=status.HTTP_200_OK)
+	def test_login_by_email(self):
+		data = {
+			"email": "test0@test.com",
+			"password" : "thisispass"
+		}
+		get_user_model().objects.create_user(username = " ",
+								email = data["email"],
+								password = data["password"]
+							    )
+		self.post(self.login_url, data=data, status_code=200)
+		self.assertIn( 'token', self.response.json.keys() )
 
+	@override_settings(ACCOUNT_LOGOUT_ON_GET=True)
+	def test_logout_on_get(self):
+		data = {
+			"email": "test@test.com",
+			"password": "thisispass"
+		}
+		get_user_model().objects.create_user(username = "test",
+								email = data["email"], 
+								password = data["password"]
+							    )
+		self.post(self.login_url, data = data, status_code=200)
+		self.get(self.logout_url, status=status.HTTP_200_OK)
+
+	@override_settings(ACCOUNT_LOGOUT_ON_GET=False)
+	def test_logout_on_post_only(self):
+		data = {
+			"email": "test1@test.com",
+			"password": "thisispass"
+		}
+		get_user_model().objects.create_user(username = "test",
+								email = data["email"],
+								password = data["password"]
+							    )
+		self.post(self.login_url, data=data, status_code=200)
+		self.get(self.logout_url, status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
@@ -220,11 +248,6 @@ class SocialLoginTests(TestCase, test_base.BaseAPITestCase):
 			account__user = socialaccount.user)[0]
 		)
 		self.assertEqual(access, 'testac') # get access
-
-		
-
-
-
 
 
 # python manage.py test forth_ai_backend
