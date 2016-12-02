@@ -51,6 +51,6 @@ def detail(request):
 	jwt = detail['token']
 	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
 	response = HttpResponseRedirect(url, jwt)
-	response.set_cookie('jwt', value = jwt, domain = '.uiplay.cn')
+	response.set_cookie('jwt', value = jwt, domain = settings.SESSION_COOKIE_DOMAIN)
 
 	return response

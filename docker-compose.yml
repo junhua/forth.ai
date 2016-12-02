@@ -2,23 +2,14 @@
  services:
    db:
      image: postgres
+     ports:
+       - "5055:5432"
    web:
      build: .
      command: python manage.py runserver 0.0.0.0:8000
      volumes:
        - .:/code
      ports:
-       - "8000:8000"
+       - "8088:8000"
      depends_on:
        - db
-  # nginx:
-  #    build: ./nginx/
-  #    ports:
-  #      - "80:80"
-  #    volumes:
-  #      - /www/static
-  #    volumes_from:
-  #      - web
-  #    links:
-  #      - web:web
-
