@@ -16,6 +16,7 @@ script:
   - ls -lah
   - docker-compose up -d
   - docker ps
+  - docker exec forthaibackend_web_1 pip install coveralls
   - docker exec forthaibackend_web_1 python manage.py makemigrations
   - docker exec forthaibackend_web_1 python manage.py makemigrations posts
   - docker exec forthaibackend_web_1 python manage.py migrate
