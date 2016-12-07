@@ -1,2 +1,8 @@
+fixture/
+*/.dS_Store
+.DS_Store
+migrations/
+static/
 .venv
+forth_ai_backend/fixtures
 *.pyc
