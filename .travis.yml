@@ -15,6 +15,9 @@ before_install:
 script:
   - ls -lah
   - docker-compose up -d
-  - docker-compose ps
-  - docker-compose exec forthaibackend_web_1 source migration.sh
-  - docker-compose exec forthaibackend_web_1 python manage.py test
+  - docker ps
+  - docker exec forthaibackend_web_1 source migration.sh
+  - docker exec forthaibackend_web_1 python manage.py test
+
+after_failure:
+  - docker logs forthaibackend_web_1
