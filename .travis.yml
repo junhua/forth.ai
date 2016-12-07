@@ -16,7 +16,6 @@ script:
   - ls -lah
   - docker-compose up -d
   - docker ps
-  - docker exec forthaibackend_web_1 pip install coveralls
   - docker exec forthaibackend_web_1 python manage.py makemigrations
   - docker exec forthaibackend_web_1 python manage.py makemigrations posts
   - docker exec forthaibackend_web_1 python manage.py migrate
@@ -24,4 +23,5 @@ script:
   - docker cp forthaibackend_web_1:/code/.coverage .coverage
   - sed -i.bak s#/code/#$(pwd)/#g .coverage
   - cat .coverage
+  - pip install coveralls
   - coveralls
