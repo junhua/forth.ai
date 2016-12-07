@@ -16,8 +16,4 @@ script:
   - ls -lah
   - docker-compose up -d
   - docker ps
-  - docker exec forthaibackend_web_1 source migration.sh
-  - docker exec forthaibackend_web_1 python manage.py test
-
-after_failure:
-  - docker logs forthaibackend_web_1
+  - docker exec forthaibackend_web_1 python manage.py test forth_ai_backend
