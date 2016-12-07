@@ -34,22 +34,25 @@ class CreateUser(RegisterView):
 
 
 def login_token(provider, access):
-	url = '%s/rest-auth/%s/' %(settings.BACKEND_BASE_URL, provider)
+	url = '%s/rest-auth/%s/' %('http://10.2.11.127:8088', provider)
 	data = {
 		"access_token": access
 	}
 	response = requests.post(url,data)
+	print url, response, response.content
 	return response.content
 
 
 def detail(request):
+	print settings.SESSION_COOKIE_DOMAIN
 	user = request.user
 	provider = str(SocialAccount.objects.filter(user = user)[0].provider)
 	access =  str(SocialToken.objects.filter(account__user = user)[0])
+	print user, provider, access
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail['token']
-	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
+	url = 'https://www.baidu.com/'
 	response = HttpResponseRedirect(url, jwt)
 	response.set_cookie('jwt', value = jwt, domain = settings.SESSION_COOKIE_DOMAIN)
 
