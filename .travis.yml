@@ -16,12 +16,11 @@ script:
   - ls -lah
   - docker-compose up -d
   - docker ps
+  - docker exec forthaibackend_web_1 pip install coveralls
   - docker exec forthaibackend_web_1 python manage.py makemigrations
   - docker exec forthaibackend_web_1 python manage.py makemigrations posts
   - docker exec forthaibackend_web_1 python manage.py migrate
-  - docker exec forthaibackend_web_1 python manage.py test apps
-  - docker exec forthaibackend_web_1 python manage.py test forth_ai_backend
+  - docker exec forthaibackend_web_1 coverage run --source=apps,forth_ai_backend manage.py test
 
 after_success:
-  - pip install coveralls==0.5
-  - coveralls
+  - docker exec forthaibackend_web_1 coveralls
