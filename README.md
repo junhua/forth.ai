@@ -1,5 +1,4 @@
 # forth.ai.backend
-==
 
 ## Stack
 - python 2.7
@@ -16,7 +15,6 @@
 `eval $(docker-machine env dev)`
 
 1. Run compose
-`docker-compose build` then 
 `docker-compose up -d`
 
 1. Check ip
