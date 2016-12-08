@@ -34,12 +34,11 @@ class CreateUser(RegisterView):
 
 
 def login_token(provider, access):
-	url = '%s/rest-auth/%s/' %('http://10.2.11.127:8088', provider)
+	url = '%s/rest-auth/%s/' %(settings.BACKEND_BASE_URL, provider)
 	data = {
 		"access_token": access
 	}
 	response = requests.post(url,data)
-	print url, response, response.content
 	return response.content
 
 
