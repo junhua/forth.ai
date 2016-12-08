@@ -43,7 +43,7 @@ class RepostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         resp = requests.post(user_post_api, params = params)
 
 
-    def perform_create(self, serializers):
+    def perform_create(self, serializer):
         # TODO: post to github or fb
         user = self.request.user
         data = self.request.data
@@ -51,6 +51,10 @@ class RepostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         # POST NLP-->data
         post_data = data # temp
         self.fb_login(access, post_data)
+
+        serializer.save()
+
+
 
         
     # filter_fields = ['owner', ]
