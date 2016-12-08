@@ -1,6 +1,9 @@
 # forth.ai.backend
 ==
 
+[![Build Status](https://travis-ci.org/junhua/forth.ai.backend.svg?branch=master)](https://travis-ci.org/junhua/forth.ai.backend)
+[![Coverage Status](https://coveralls.io/repos/github/junhua/forth.ai.backend/badge.svg?branch=master)](https://coveralls.io/github/junhua/forth.ai.backend?branch=master)
+
 ## Stack
 - python 2.7
 - django and django rest framework
