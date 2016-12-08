@@ -44,15 +44,13 @@ def login_token(provider, access):
 
 
 def detail(request):
-	print settings.SESSION_COOKIE_DOMAIN
 	user = request.user
 	provider = str(SocialAccount.objects.filter(user = user)[0].provider)
 	access =  str(SocialToken.objects.filter(account__user = user)[0])
-	print user, provider, access
 
 	detail = json.loads(login_token(provider, access))
-	jwt = detail['token']
-	url = 'https://www.baidu.com/'
+	jwt = detail.get('token', None)
+	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
 	response = HttpResponseRedirect(url, jwt)
 	response.set_cookie('jwt', value = jwt, domain = settings.SESSION_COOKIE_DOMAIN)
 
