@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.github',
+    # 'django_facebook',
 
 
     # apps
@@ -103,6 +104,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
 
+                # 'django_facebook.context_processors.facebook',
+                # 'django.core.context_processors.request',
 
             ],
         },
@@ -233,3 +236,12 @@ SOCIALACCOUNT_PROVIDERS = \
         'LOCALE_FUNC': 'path.to.callable',
         'VERIFIED_EMAIL': False,
         'VERSION': 'v2.4'}}
+
+FB_HOST = os.environ['FB_HOST']
+# FACEBOOK_APP_ID = 544544612409281
+# FACEBOOK_APP_SECRET = 'd8f0b20e9d8f7c06a317d658723f5c38'
+
+# https://github.com/Tivix/django-rest-auth/issues/122
+# JWT_AUTH = {
+# 'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+# }

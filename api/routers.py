@@ -4,4 +4,4 @@ from apps.posts.views import *
 router = DefaultRouter()
 
 # posts
-router.register(r'posts', RepostViewSet, base_name='posts')
+router.register(r'posts', PostViewSet, base_name='posts')

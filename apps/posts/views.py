@@ -1,10 +1,24 @@
 from django.shortcuts import render
-from rest_framework import viewsets, authentication, permissions, filters
+
+from rest_framework import (viewsets, 
+                            authentication, 
+                            permissions, 
+                            filters
+                            )
+from rest_framework import status as status_code
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import *
 from .serializers import *
+from .facebook import *
 
 import requests
 from allauth.socialaccount.models import SocialToken
+from .permissions import IsOwner
+from django.conf import settings
+
+import time
 
 class DefaultsMixin(object):
 
@@ -14,8 +28,9 @@ class DefaultsMixin(object):
     """
 
     permission_classes = (
-        permissions.IsAuthenticated,
-        #permissions.AllowAny,
+        #permissions.IsAuthenticated,
+        #IsOwner,
+        permissions.AllowAny,
     )
     paginate_by = 25
     # paginate_by_param = "owner"
@@ -27,32 +42,118 @@ class DefaultsMixin(object):
     )
 
 
-class RepostViewSet(DefaultsMixin, viewsets.ModelViewSet):
-    serializer_class = RepostSerializer
+class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
 
-    def fb_login(self, access, post_data):
-        fb_host = 'https://graph.facebook.com/v2.8'
-        user_post_api = fb_host + '/me/feed'
-        message = post_data.get('content')
-        params = {
-            'message':message,
-            'access_token':access
-    
-        }
-        resp = requests.post(user_post_api, params = params)
+    def create_page_post(self, pages, post_id):
+        for page in pages:
+            page_id = page['id']
+            data = {
+                'page_id':page_id, 
+                'post_id':post_id, 
+                'is_published':False
+            }
+            serializer = PagePostSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
+    def create(self, request, *args, **kwargs):
+        #owner = request.user
+        request.data['status'] = 0
 
-    def perform_create(self, serializer):
-        # TODO: post to github or fb
-        user = self.request.user
-        data = self.request.data
-        access =  str(SocialToken.objects.filter(account__user = user)[0])
-        # POST NLP-->data
-        post_data = data # temp
-        self.fb_login(access, post_data)
+        if 'pages' in request.data:
+            pages = request.data.pop('pages')
+        else:
+            return Response(
+                {'detail': 'pages field is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        #serializer.save(owner = owner)
         serializer.save()
+
+        post_id = serializer.data['id']
+        self.create_page_post(pages, post_id)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, 
+            status=status_code.HTTP_201_CREATED,
+            headers=headers
+        )
+
+    def list(self, request, *args, **kwargs):
+        page_id = request.query_params.get('page_id', None)
+        status = request.query_params.get('status', None)
+
+        if status:
+            if status == 'pending':
+                status = 0
+            elif status == 'sent':
+                status = 1
+            else:
+                return Response(
+                {'detail': ' "status" should be pending or sent'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+        else:
+            return Response(
+                {'detail': 'query parameter "status" is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+
+        if page_id:
+            if page_id.isdigit():
+                page_id = int(page_id)
+                page_posts = PagePost.objects.filter(page_id=page_id)
+            else:
+                return Response(
+                {'detail': 'page_id is number'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+        else:
+            return Response(
+                {'detail': 'query parameter "page_id" is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+
+        page_post_ids = [page_post.post_id.id for page_post in page_posts]
+        pending_posts = self.queryset.filter(status=status)
+        posts = []
+        for post in pending_posts:
+            if post.id in page_post_ids:
+                serializer = self.get_serializer(post)
+                posts.append(serializer.data)
+
+        return Response(posts)
+
+    def update(self, request, *args, **kwargs):
+        if request.data.get('status'):
+            request.data['status'] = 0
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # refresh the instance from the database.
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs) 
 
 
 
@@ -65,3 +166,8 @@ class RepostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     #     qs = super(FileUploaderViewSet, self).get_queryset(*args, **kwargs)
     #     qs = qs.filter(owner=self.request.user)
     #     return qs
+
+class Me(APIView):
+    def get(self, request):
+        user = self.request.user
+        access =  str(SocialToken.objects.filter(account__user = user)[0])

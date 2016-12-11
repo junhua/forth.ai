@@ -28,3 +28,33 @@ class RepostSerializer(serializers.ModelSerializer):
 
     # def create(self, validated_data):
         # return Post.objects.create(**validated_data)
+
+class CreatePostSerializer(serializers.ModelSerializer):
+    #owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Post
+        fields = ('id', 'date_publish', 'status', "type", 
+                'themes', 'keywords', 'content',
+                #'owner'
+                )
+
+        read_only_fields = ('date_created', )
+
+class PagePostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PagePost
+        fields = ('id', 'page_id', 'post_id', 'is_published')
+
+class PageSerializer(serializers.ModelSerializer):
+    # extra_data = JSONField(binary=True)
+
+    class Meta:
+        model = Pages
+        fields = ('id', 'name', 'avatar', 'provider', 'type', 'extra_data')
+
+class PageUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PageUser
+        fields = ('id', 'user_id', 'page_id')
