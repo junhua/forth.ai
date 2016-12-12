@@ -29,10 +29,10 @@ class Post(models.Model):
     )
 
 
-    date_publish = models.DateTimeField(
+    publish_date = models.DateTimeField(
         _('date published'),
-        default=timezone.now,
-        editable=False,
+        null=False,
+        blank=False,
         help_text=_("The date which the post was posted to social.")
     )
 
@@ -108,6 +108,12 @@ class Post(models.Model):
         ordering = ['date_created']
 
 class Pages(models.Model):
+
+    uid = models.PositiveIntegerField(
+        help_text=_("id from facebook"),
+        default =5
+        )
+
     ME, PAGE = (0, 1)
 
     TYPE = (
@@ -139,13 +145,13 @@ class Pages(models.Model):
         null=False,
         blank=False,
     )
-    extra_data = JSONField(
+    extra_data = models.TextField(
         verbose_name=_('extra data'), 
         default=dict
     ) 
 
 class PagePost(models.Model):
-    page_id = models.ForeignKey(
+    page = models.ForeignKey(
         'Pages',
         on_delete=models.CASCADE,
         related_name="post_page",
@@ -155,7 +161,7 @@ class PagePost(models.Model):
         help_text=_("The page has post or posts")
     )
 
-    post_id = models.ForeignKey(
+    post = models.ForeignKey(
         'Post',
         on_delete=models.CASCADE,
         related_name="page_post",
@@ -168,7 +174,7 @@ class PagePost(models.Model):
     is_published = models.BooleanField()
 
 class PageUser(models.Model):
-    user_id = models.ForeignKey(
+    user = models.ForeignKey(
         'auth.User',
         on_delete=models.CASCADE,
         related_name="page_user",
@@ -178,7 +184,7 @@ class PageUser(models.Model):
         help_text=_("The user has page or pages")
     )
 
-    page_id = models.ForeignKey(
+    page = models.ForeignKey(
         'Pages',
         on_delete=models.CASCADE,
         related_name="user_page",

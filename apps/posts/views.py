@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.conf import settings
 
 from rest_framework import (viewsets, 
                             authentication, 
@@ -7,18 +8,19 @@ from rest_framework import (viewsets,
                             )
 from rest_framework import status as status_code
 from rest_framework.response import Response
-from rest_framework.views import APIView
+
 
 from .models import *
 from .serializers import *
 from .facebook import *
 
-import requests
-from allauth.socialaccount.models import SocialToken
-from .permissions import IsOwner
-from django.conf import settings
-
+import requests, json
 import time
+from allauth.socialaccount.models import SocialToken
+
+from .permissions import IsOwner
+from facebook import *
+
 
 class DefaultsMixin(object):
 
@@ -49,9 +51,10 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def create_page_post(self, pages, post_id):
         for page in pages:
             page_id = page['id']
+            print type(page_id)
             data = {
-                'page_id':page_id, 
-                'post_id':post_id, 
+                'page':page_id,
+                'post':post_id,
                 'is_published':False
             }
             serializer = PagePostSerializer(data=data)
@@ -76,6 +79,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         serializer.save()
 
         post_id = serializer.data['id']
+
         self.create_page_post(pages, post_id)
 
         headers = self.get_success_headers(serializer.data)
@@ -86,6 +90,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         )
 
     def list(self, request, *args, **kwargs):
+        owner = request.user
         page_id = request.query_params.get('page_id', None)
         status = request.query_params.get('status', None)
 
@@ -108,7 +113,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         if page_id:
             if page_id.isdigit():
                 page_id = int(page_id)
-                page_posts = PagePost.objects.filter(page_id=page_id)
+                page_posts = PagePost.objects.filter(page=page_id)
             else:
                 return Response(
                 {'detail': 'page_id is number'},
@@ -120,8 +125,9 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
-        page_post_ids = [page_post.post_id.id for page_post in page_posts]
+        page_post_ids = [page_post.post.id for page_post in page_posts]
         pending_posts = self.queryset.filter(status=status)
+        #pending_posts = self.queryset.filter(status=status,owner=owner)
         posts = []
         for post in pending_posts:
             if post.id in page_post_ids:
@@ -136,7 +142,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = UpdatePostSerializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -147,6 +153,11 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(instance)
 
         return Response(serializer.data)
+
+
+    # TODO
+    # def delete(self):
+    #     print("delete post belongs to multiple pages")
 
     def perform_update(self, serializer):
         serializer.save()
@@ -167,7 +178,32 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     #     qs = qs.filter(owner=self.request.user)
     #     return qs
 
-class Me(APIView):
-    def get(self, request):
+class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    serializer_class = PageSerializer
+    queryset = Pages.objects.all()
+
+
+    def user_access(self):
         user = self.request.user
         access =  str(SocialToken.objects.filter(account__user = user)[0])
+        return access
+
+    def user_id(self):
+        user = self.request.user
+        # TODO get social user id 
+        return 1
+
+    def list(self, request, *args, **kwargs):
+        # TODO: get me(api-type=0)/pages(api-type=1) from provider = facebook
+
+        user_id = self.user_id()
+        user_pages = PageUser.objects.filter(user = user_id)
+        
+        pages = []
+        for page in user_pages:
+            serializer = self.get_serializer(page.page)
+            pages.append(serializer.data)
+        return Response(pages)
+
+
+

@@ -29,12 +29,24 @@ class RepostSerializer(serializers.ModelSerializer):
     # def create(self, validated_data):
         # return Post.objects.create(**validated_data)
 
+class UpdatePostSerializer(serializers.ModelSerializer):
+    #owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Post
+        fields = ('id', 'publish_date',
+                'themes', 'keywords', 'content',
+                #'owner'
+                )
+
+        read_only_fields = ('date_created', )
+
 class CreatePostSerializer(serializers.ModelSerializer):
     #owner = serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = Post
-        fields = ('id', 'date_publish', 'status', "type", 
+        fields = ('id', 'publish_date', 'status', "type", 
                 'themes', 'keywords', 'content',
                 #'owner'
                 )
@@ -45,16 +57,16 @@ class PagePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PagePost
-        fields = ('id', 'page_id', 'post_id', 'is_published')
+        fields = ('id', 'page', 'post', 'is_published')
 
 class PageSerializer(serializers.ModelSerializer):
     # extra_data = JSONField(binary=True)
-
     class Meta:
         model = Pages
-        fields = ('id', 'name', 'avatar', 'provider', 'type', 'extra_data')
+        fields = ('id', 'uid', 'name', 'avatar', 'provider', 
+            'type', 'extra_data')
 
 class PageUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = PageUser
-        fields = ('id', 'user_id', 'page_id')
+        fields = ('id', 'user', 'page')
