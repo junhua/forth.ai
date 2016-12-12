@@ -1,3 +1,11 @@
+ status:
+ 0 -- PENDING
+ 1 -- SENT = (0, 1)
+ type:
+ 0 -- ME
+ 1 -- PAGE = (0, 1)
+
+
 # POST api
 ## Create
 **POST /v1/posts/**  
