@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-import os
+import os,datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -242,6 +242,6 @@ FB_HOST = os.environ['FB_HOST']
 # FACEBOOK_APP_SECRET = 'd8f0b20e9d8f7c06a317d658723f5c38'
 
 # https://github.com/Tivix/django-rest-auth/issues/122
-# JWT_AUTH = {
-# 'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-# }
+JWT_AUTH = {
+'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
