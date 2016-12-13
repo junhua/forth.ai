@@ -21,6 +21,7 @@ Body
 ```json
 {
 	"publish_date": "2017-01-12 23:13:08",
+    "publish_now":false,
     "themes": [],
     "keywords": [],
 	"content": "hello world",
@@ -35,14 +36,13 @@ Body
 
 **Response**
 
-Status  
 Status 201 Created
 
 Body
 ```json
 {
     "id": 49,
-    "publish_date": "2017-01-12T23:13:08Z",
+    "publish_date": "2017-01-12 23:13:08",
     "status": 0,
     "type": 2,
     "themes": [],
@@ -51,14 +51,13 @@ Body
 }
 ```
 ## Retrive List
-**GET /v1/posts?status=pending&page_id=1**
+**GET /v1/posts?status=0&page_id=1**
 
 Headers  
 Authorization: "jwt token_retrieved"
 
 **Response**
 
-Status  
 Status 200 OK
 
 Body
@@ -66,7 +65,7 @@ Body
 [
     {
         "id": 25,
-        "publish_date": "2016-12-11T04:29:00.486919Z",
+        "publish_date": "2016-12-11 04:29:00",
         "status": 0,
         "type": 2,
         "themes": [],
@@ -75,7 +74,7 @@ Body
     },
     {
         "id": 26,
-        "date_publish": "2016-12-11T05:00:42.646724Z",
+        "publish_date": "2016-12-11 05:00:42",
         "status": 0,
         "type": 2,
         "themes": [],
@@ -92,7 +91,6 @@ Authorization: "jwt token_retrieved"
 
 **Response**
 
-Status  
 Status 200 OK
 
 Body
@@ -100,9 +98,13 @@ Body
 {
     "id": 1,
     "content": "hello world",
-    "date_create": "2017-01-12 23:13:08",
-    "date_publish": "2017-01-13 23:13:08",
-    "status": "pending"
+    "date_created": "2017-01-12 23:13:08",
+    "publish_date": "2017-01-13 23:13:08",
+    "status": 0,
+    "pages": [
+        {"id": 1},
+        {"id": 2}
+    ]
 }
 ```
 
@@ -118,30 +120,25 @@ Body
 ```json
 {
     "content": "Bye world",
-    "publish_date": "2017-01-19 23:13:08",
-    "themes": [1111,111],
-    "keywords": [2222,222]
+    "publish_date": "2017-01-19 23:13:08"
 }
 ```
 **Response**
 
-Status  
 Status 200 OK
 
 Body
 ```json
 {
-    "id": 40,
-    "publish_date": "2017-01-19T23:13:08Z",
-    "themes": [
-        "1111",
-        "111"
-    ],
-    "keywords": [
-        "2222",
-        "222"
-    ],
-    "content": "Bye world"
+    "id": 1,
+    "content": "hello world",
+    "date_created": "2017-01-12 23:13:08",
+    "publish_date": "2017-01-19 23:13:08",
+    "status": 0,
+    "pages": [
+        {"id": 1},
+        {"id": 2}
+    ]
 }
 ```
 ## Delete
@@ -152,12 +149,16 @@ Authorization: "jwt token_retrieved"
 
 **Response**
 
-Status  
-HTTP_204_NO_CONTENT
+Status 204 NO CONTENT
 
 
 
 #Page API
+
+**Type:**
+
+0 -- ACCOUNT  
+1 -- PAGE 
 
 ## Retrive pages
 **GET /v1/pages/**
@@ -167,7 +168,6 @@ Authorization: "jwt token_retrieved"
 
 **Response**
 
-Status  
 Status 200 OK
 
 Body
@@ -178,12 +178,14 @@ Body
     "name": "mark0",
     "provider": "facebook",
     "avatar": "http://....",
+    "type": 0,
     "extra_data": "{extra_data_in_json_format}"
   },
   {
     "id": 2,
     "name": "mark1",
     "provider": "facebook",
+    "type": 1
     "avatar": "http://....",
     "extra_data": "{extra_data_in_json_format}"
   }
