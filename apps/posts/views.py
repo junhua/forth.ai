@@ -98,30 +98,16 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         page_id = request.query_params.get('page_id', None)
         status = request.query_params.get('status', None)
 
-        if not status:
-            return Response(
-                {'detail': 'query parameter "status" is required'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
-
+        filters = {}
         if page_id:
             if page_id.isdigit():
                 page_id = int(page_id)
-                page_posts = PagePost.objects.filter(page=page_id)
-            else:
-                return Response(
-                {'detail': 'page_id is number'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
-        else:
-            return Response(
-                {'detail': 'query parameter "page_id" is required'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
+                page_posts = PagePost.objects.values_list('post', flat=True).filter(page=page_id)
+                filters['id__in'] = page_posts
+        if status:
+            filters['status'] = status
 
-
-        page_posts = PagePost.objects.values_list('post', flat=True).filter(page=page_id)
-        posts = Post.objects.filter(id__in=page_posts, status=status)
+        posts = Post.objects.filter(**filters)
         serializer = CreatePostSerializer(posts, many=True)
         
         return Response(serializer.data)
