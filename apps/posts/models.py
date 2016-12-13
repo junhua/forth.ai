@@ -114,10 +114,10 @@ class Pages(models.Model):
         default =5
         )
 
-    ME, PAGE = (0, 1)
+    ACCOUNT, PAGE = (0, 1)
 
     TYPE = (
-        (ME, "me"),
+        (ACCOUNT, "account"),
         (PAGE, "page"),
 
     )

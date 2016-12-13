@@ -43,6 +43,7 @@ class UpdatePostSerializer(serializers.ModelSerializer):
 
 class CreatePostSerializer(serializers.ModelSerializer):
     #owner = serializers.ReadOnlyField(source='owner.username')
+    publish_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
 
     class Meta:
         model = Post
@@ -60,6 +61,13 @@ class PagePostSerializer(serializers.ModelSerializer):
         fields = ('id', 'page', 'post', 'is_published')
 
 class PageSerializer(serializers.ModelSerializer):
+    # extra_data = JSONField(binary=True)
+    class Meta:
+        model = Pages
+        fields = ('id', 'uid', 'name', 'avatar', 'provider', 
+            'type', 'extra_data')
+
+class ShowPageSerializer(serializers.ModelSerializer):
     # extra_data = JSONField(binary=True)
     class Meta:
         model = Pages
