@@ -20,7 +20,7 @@ Authorization: "jwt token_retrieved"
 Body
 ```json
 {
-	"publish_date": "2017-01-12 23:13:08",
+	"publish_date": "2017-01-12T23:13:08Z",
     "publish_now":false,
     "themes": [],
     "keywords": [],
@@ -42,7 +42,7 @@ Body
 ```json
 {
     "id": 49,
-    "publish_date": "2017-01-12 23:13:08",
+    "publish_date": "2017-01-12T23:13:08Z",
     "status": 0,
     "type": 2,
     "themes": [],
@@ -65,7 +65,7 @@ Body
 [
     {
         "id": 25,
-        "publish_date": "2016-12-11 04:29:00",
+        "publish_date": "2016-12-11T04:29:00Z",
         "status": 0,
         "type": 2,
         "themes": [],
@@ -74,7 +74,7 @@ Body
     },
     {
         "id": 26,
-        "publish_date": "2016-12-11 05:00:42",
+        "publish_date": "2016-12-11T05:00:42Z",
         "status": 0,
         "type": 2,
         "themes": [],
@@ -98,8 +98,8 @@ Body
 {
     "id": 1,
     "content": "hello world",
-    "date_created": "2017-01-12 23:13:08",
-    "publish_date": "2017-01-13 23:13:08",
+    "date_created": "2017-01-12T23:13:08Z",
+    "publish_date": "2017-01-13T23:13:08Z",
     "status": 0,
     "pages": [
         {"id": 1},
@@ -120,7 +120,7 @@ Body
 ```json
 {
     "content": "Bye world",
-    "publish_date": "2017-01-19 23:13:08"
+    "publish_date": "2017-01-19T23:13:08Z"
 }
 ```
 **Response**
@@ -132,8 +132,8 @@ Body
 {
     "id": 1,
     "content": "hello world",
-    "date_created": "2017-01-12 23:13:08",
-    "publish_date": "2017-01-19 23:13:08",
+    "date_created": "2017-01-12T23:13:08Z",
+    "publish_date": "2017-01-19T23:13:08Z",
     "status": 0,
     "pages": [
         {"id": 1},
