@@ -15,14 +15,14 @@ from rest_framework.response import Response
 
 from .models import *
 from .serializers import *
-from .facebook import *
+from .facebook import Facebook
 
 import requests, json
 import time
 from allauth.socialaccount.models import SocialToken
 
 from .permissions import IsOwner
-from facebook import *
+import datetime
 
 
 class DefaultsMixin(object):
@@ -33,7 +33,7 @@ class DefaultsMixin(object):
     """
 
     permission_classes = (
-        #permissions.IsAuthenticated,
+        permissions.IsAuthenticated,
         #IsOwner,
         permissions.AllowAny,
     )
@@ -46,64 +46,124 @@ class DefaultsMixin(object):
         filters.OrderingFilter,
     )
 
+def social_post(post_ids):
+    time_format = '%Y-%m-%dT%H:%M:%SZ'
+    time_current = time.strftime(time_format)
+
+    for post_id in post_ids:
+ 
+        post = Post.objects.filter(id = post_id)
+        post.update(status = 1, 
+                    publish_date = time_current)
+
+        post_obj = post[0]
+        content = post_obj.content
+        page_obj = post_obj.page
+
+        if page_obj.provider == 'facebook':
+            print 'post to facebook'
+            fb = Facebook()
+            if page_obj.type == 0:
+                print 'post to me'
+                #fb.user_post(access, content)
+            else:
+                print 'post to page', page_obj.uid
+                #fb.page_post(page_id, access, content)
+        elif page_obj.provider == 'google':
+            pass
+        else:
+            pass
+
+def user_access(user):
+    access =  str(SocialToken.objects.filter(account__user = user)[0])
+    return access
+
+def user_id(user):
+    username = user.username
+    User = get_user_model()
+    user_id = User.objects.get(username=username)
+    return user_id
+    
+def dealwith_content(content):
+    # TODO: dedalwith content
+    return content
 
 class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     # TODO: permission: only page in current user's page can post
-    # TODO: filter is changeble
 
     serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
 
-    def create_page_post(self, pages, post_id):
-        for page in pages:
-            page_id = page['id']
-            print type(page_id)
-            data = {
-                'page':page_id,
-                'post':post_id,
-                'is_published':False
-            }
-            serializer = PagePostSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
     def create(self, request, *args, **kwargs):
+        owner = request.user
 
         if 'pages' in request.data:
-            pages = request.data.pop('pages')
+            pages = request.data['pages']
         else:
             return Response(
                 {'detail': 'pages field is required'},
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        #serializer.save(owner = owner)
-        serializer.save()
+        is_published = False
+        if 'publish_now' in request.data:
+            publish_now = request.data['publish_now']# True  
+        else:
+            return Response(
+                {'detail': 'publish_now field is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
 
-        post_id = serializer.data['id']
+        response = {}
+        response['posts'] = []
+        post_ids = []
+        for page in pages:
+            page_id = page['id']
+            try:
+                page = Pages.objects.get(id = page_id)
+            except Pages.DoesNotExist:
+                return  Response(
+                {'detail': 'page id is not exist'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+            
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(owner = owner, page = page)
 
-        self.create_page_post(pages, post_id)
+            response['posts'].append(serializer.data)
+            post_ids.append(serializer.data['id'])
+            print post_ids
+
+        if publish_now:
+            social_post(post_ids)
+
 
         headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data, 
+            response,
             status=status_code.HTTP_201_CREATED,
             headers=headers
         )
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def list(self, request, *args, **kwargs):
+
         owner = request.user
-        page_id = request.query_params.get('page_id', None)
+        username = owner.username
+
+        page_id = request.query_params.get('page', None)
         status = request.query_params.get('status', None)
 
         filters = {}
         if page_id:
             if page_id.isdigit():
                 page_id = int(page_id)
-                page_posts = PagePost.objects.values_list('post', flat=True).filter(page=page_id)
-                filters['id__in'] = page_posts
+                filters['page'] = page_id
         if status:
             filters['status'] = status
 
@@ -127,7 +187,6 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(instance)
 
         return Response(serializer.data)
-
 
     def perform_update(self, serializer):
         serializer.save()
@@ -159,36 +218,35 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         return Response('Method not allowed')
 
-    def user_access(self, user):
-        access =  str(SocialToken.objects.filter(account__user = user)[0])
-        return access
 
-    def flush_page(self, user):
-        # # facebook page update/create
-        # access = self.user_access(user)
-        # user_id = self.user_id(user)
 
-        # fb = facebook()
-        # pages = fb.get_page(access)['id']
-        pass
-        
-    def user_id(self, user):
-        username = user.username
-        User = get_user_model()
-        user_id = User.objects.get(username=username)
-        return user_id
+    def flush_page(self, user): # get facebook datas
+        # facebook page update/create
+        access = self.user_access(user)
+        user_id = self.user_id(user)   # page-user
+
+        access = "EAASUvfehTJgBALenUT74yYesR9rnZCSjXjkRl8hz7KjhYOAvZBkoXYn94ojaBA9SoZBqkXihDT90elJq0yEhIXe1Aa4erfo3gQ4vi71i8dwN4YlIaYzxJ3ZAJBSKkA97z8WbK1IOlAuEDwUll0uKymZAZCmYBondNzmQgEjgZC83YDtng0BCPGl1QXCW1zIsBgJJ6OF9hZA7UgZDZD"
+        fb = Facebook()
+        pages = []
+        account = fb.get_me(access)
+        #print '============', account, type(account)
+        pages.append(account)
+        pages += fb.get_pages(access)
+
+        #print '**********************', pages
+        for page in pages:
+            Pages.objects.create(**page)
+
+            page_id = Pages.objects.get(uid=page['uid']).id
+            #PageUser.objects.create(user=user_id, page=page_id)
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
-        self.flush_page(user)
-
-        # TODO: get me(api-type=0)/pages(api-type=1) from provider = facebook
+        #print '???? user', user
+        #self.flush_page(user)
 
         user_id = self.user_id(user)
         user_pages = PageUser.objects.values_list('page', flat=True).filter(user = user_id)
         pages = Pages.objects.filter(id__in=user_pages) #where in
         serializer = self.get_serializer(pages, many=True)
         return Response(serializer.data)
-
-
-

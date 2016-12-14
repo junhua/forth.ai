@@ -1,44 +1,73 @@
 from django.conf import settings
-import json
+from rest_framework.views import APIView
+import requests, json
 
-class Facebbok():
+class Facebook():
 	def __init__(self):
-		self.__user_post_api = settings.FB_HOST + '/me/feed/'
-		self.__me_id_api = settings.FB_HOST + '/me/'
-		self.__page_api = settings.FB_HOST + '/me/accounts/'
+		self.__user_post_api = settings.FB_HOST + '/me/feed'
+		self.__page_post_api = settings.FB_HOST + '/%s/feed'
 
-	def get_me(self, id, access):
-		me_api = settings.FB_HOST + id
+		self.__me_base_api = settings.FB_HOST + '/me'
+		self.__pages_api = settings.FB_HOST + '/me/accounts'
+		self.__headers = {'Content-Type': 'application/json'}
+
+	def get_me(self, access):
+		me = {}
+		me['provider'] = 'facebook'
+		me['type'] = 0
+
+		url = self.__me_base_api + '?fields=id,name,picture&access_token=%s' % access
+		response = requests.get(url, headers = self.__headers)
+		response = json.loads(response.content)
+
+		me['uid'] = response['id']
+		me['name'] = response['name']
+		me['avatar'] = response['picture']['data']['url']
+
+		return me
+
+	def get_pages(self, access):
+		pages = []
+
+		url = self.__page_post_api + '?fields=id,name,picture&access_token=%s' % access
+		response = requests.get(url, headers = self.__headers)
+		response = json.loads(response.content)
+		print '??????????????   page respnse', response
+
+		for data in response:
+			print'1111111================ data ==========', data 
+			page['provider'] = 'facebook'
+			page['type'] = 1
+			page['uid'] = data['id']
+			page['name'] = data['name']
+			page['avatar'] = data['picture']['data']['url']
+
+			pages.append(page)
+
+		return pages
+
+	def user_post(self, access, message):
 		params = {
-			'access_token':access
+			'message': message,
+			'access_token': access 
 		}
-		response = requests.post(me_api, params = params)
+		requests.post(self.__user_post_api, params = params)
 
+	def page_access(self, page_id, access):
+		page_access_api = settings.FB_HOST + '/%s/access_token' % page_id
+		params = {
+			'access_token': access
+		}
+		response = requests.post(page_access_api, params = params)
 
+		page_access = json.loads(response.content)['access_token']
+		return page_access
 
-		pass
-	def get_page(self):
-		pass
+	def page_post(self, page_id, access, message):
+		page_access = self.page_access(page_id, access)
+		params = {
+			'access_token': page_access
+		}
 
-	def fb_user_post(self, access, post_data):
-		pass
-
-		# # user = self.request.user
-  #       # data = self.request.data
-        
-  #       # POST NLP-->data
-  #       post_data = data 
-  #       access =  str(SocialToken.objects.filter(account__user = user)[0])
-  #       #self.fb_user_post(access, post_data)
-  #       self.fb_page_post(access, post_data)
-
-
-  #       user_post_api = settings.FB_HOST + '/me/feed/'
-  #       message = post_data.get('content')
-  #       params = {
-  #           'message':message,
-  #           'access_token':access
-    
-  #       }
-  #       resp = requests.post(user_post_api, params = params)
-
+		url = self.__page_post_api % page_id
+		requests.post(url, params = params)

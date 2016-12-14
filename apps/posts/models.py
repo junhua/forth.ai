@@ -60,6 +60,16 @@ class Post(models.Model):
         help_text=_("The ownder of the post")
     )
 
+    page = models.ForeignKey(
+        'Pages',
+        on_delete=models.CASCADE,
+        related_name="post_page",
+        unique=False,
+        null=False,
+        blank=False,
+        help_text=_("The page has post or posts")
+    )
+
 
     type = models.PositiveSmallIntegerField(
         _("type"),
@@ -109,9 +119,10 @@ class Post(models.Model):
 
 class Pages(models.Model):
 
-    uid = models.PositiveIntegerField(
+    uid = models.CharField(
         help_text=_("id from facebook"),
-        default =5
+        max_length=128
+        # default =5
         )
 
     ACCOUNT, PAGE = (0, 1)
@@ -150,28 +161,6 @@ class Pages(models.Model):
         default=dict
     ) 
 
-class PagePost(models.Model):
-    page = models.ForeignKey(
-        'Pages',
-        on_delete=models.CASCADE,
-        related_name="post_page",
-        unique=False,
-        null=False,
-        blank=False,
-        help_text=_("The page has post or posts")
-    )
-
-    post = models.ForeignKey(
-        'Post',
-        on_delete=models.CASCADE,
-        related_name="page_post",
-        unique=False,
-        null=False,
-        blank=False,
-        help_text=_("The post belongs to page or pages")
-    )
-    
-    is_published = models.BooleanField()
 
 class PageUser(models.Model):
     user = models.ForeignKey(

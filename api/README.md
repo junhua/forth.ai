@@ -41,6 +41,46 @@ Status 201 Created
 Body
 ```json
 {
+    "posts": [
+        {
+            "id": 49,
+            "publish_date": "2017-01-12T23:13:08Z",
+            "status": 0,
+            "type": 2,
+            "themes": [],
+            "keywords": [],
+            "content": "hello world",
+            "page": 1
+        }
+    ]
+}
+```
+
+
+## Publish an existing post
+**POST /v1/posts/{id}/**  
+
+Headers  
+Authorization: "jwt token_retrieved"
+
+Body
+```json
+{
+    "publish_now": true,
+    "pages":[
+        {"id": 1}
+    ]
+}
+```
+
+
+**Response**
+
+Status 201 Created
+
+Body
+```json
+{
     "id": 49,
     "publish_date": "2017-01-12T23:13:08Z",
     "status": 0,
@@ -50,8 +90,10 @@ Body
     "content": "hello world"
 }
 ```
+
+
 ## Retrive List
-**GET /v1/posts?status=0&page_id=1**
+**GET /v1/posts?status=0&page=1**
 
 Headers  
 Authorization: "jwt token_retrieved"
@@ -83,8 +125,10 @@ Body
     }
 ]
 ```
+
+
 ## Retrive detail
-**GET /v1/posts/1/**
+**GET /v1/posts/{id}/**
 
 Headers  
 Authorization: "jwt token_retrieved"
@@ -111,7 +155,7 @@ Body
 
 ## Update
 
-**PUT /v1/posts/1/**
+**PUT /v1/posts/{id}/**
 
 Headers  
 Authorization: "jwt token_retrieved"
@@ -141,8 +185,10 @@ Body
     ]
 }
 ```
+
+
 ## Delete
-**DELETE /v1/posts/1/**
+**DELETE /v1/posts/{id}/**
 
 Headers  
 Authorization: "jwt token_retrieved"
