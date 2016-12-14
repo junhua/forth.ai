@@ -46,6 +46,16 @@ class DefaultsMixin(object):
         filters.OrderingFilter,
     )
 
+def user_access(user):
+    access =  str(SocialToken.objects.filter(account__user = user)[0])
+    return access
+
+def user_id(user):
+    username = user.username
+    User = get_user_model()
+    user_id = User.objects.get(username=username)
+    return user_id
+
 def social_post(post_ids):
     time_format = '%Y-%m-%dT%H:%M:%SZ'
     time_current = time.strftime(time_format)
@@ -57,6 +67,9 @@ def social_post(post_ids):
                     publish_date = time_current)
 
         post_obj = post[0]
+        user_obj = post_obj.owner
+        print '===========', user_obj
+        access = user_access(user_obj)
         content = post_obj.content
         page_obj = post_obj.page
 
@@ -65,25 +78,15 @@ def social_post(post_ids):
             fb = Facebook()
             if page_obj.type == 0:
                 print 'post to me'
-                #fb.user_post(access, content)
+                fb.user_post(access, content)
             else:
                 print 'post to page', page_obj.uid
-                #fb.page_post(page_id, access, content)
+                fb.page_post(page_id, access, content)
         elif page_obj.provider == 'google':
             pass
         else:
             pass
 
-def user_access(user):
-    access =  str(SocialToken.objects.filter(account__user = user)[0])
-    return access
-
-def user_id(user):
-    username = user.username
-    User = get_user_model()
-    user_id = User.objects.get(username=username)
-    return user_id
-    
 def dealwith_content(content):
     # TODO: dedalwith content
     return content
@@ -222,30 +225,30 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
     def flush_page(self, user): # get facebook datas
         # facebook page update/create
-        access = self.user_access(user)
-        user_id = self.user_id(user)   # page-user
+        print 'get in flush page'
+        access = user_access(user)
+        user_id = user_id(user)   # page-user
 
-        access = "EAASUvfehTJgBALenUT74yYesR9rnZCSjXjkRl8hz7KjhYOAvZBkoXYn94ojaBA9SoZBqkXihDT90elJq0yEhIXe1Aa4erfo3gQ4vi71i8dwN4YlIaYzxJ3ZAJBSKkA97z8WbK1IOlAuEDwUll0uKymZAZCmYBondNzmQgEjgZC83YDtng0BCPGl1QXCW1zIsBgJJ6OF9hZA7UgZDZD"
         fb = Facebook()
         pages = []
         account = fb.get_me(access)
-        #print '============', account, type(account)
+        print '============', account, type(account)
         pages.append(account)
         pages += fb.get_pages(access)
 
-        #print '**********************', pages
+        print '**********************', pages
         for page in pages:
             Pages.objects.create(**page)
 
             page_id = Pages.objects.get(uid=page['uid']).id
-            #PageUser.objects.create(user=user_id, page=page_id)
+            PageUser.objects.create(user=user_id, page=page_id)
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
-        #print '???? user', user
-        #self.flush_page(user)
+        print '???? user', user
+        self.flush_page(user)
 
-        user_id = self.user_id(user)
+        user_id = user_id(user)
         user_pages = PageUser.objects.values_list('page', flat=True).filter(user = user_id)
         pages = Pages.objects.filter(id__in=user_pages) #where in
         serializer = self.get_serializer(pages, many=True)
