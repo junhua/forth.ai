@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import celery
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,11 +68,12 @@ INSTALLED_APPS = [
     # apps
     'api',
     'apps.posts',
-    'forth_ai_backend.oauth'
+    'forth_ai_backend.oauth',
     # 'django-filter',
     
-
-
+    # celery
+    'djcelery',
+    'kombu.transport.django',
 ]
 
 MIDDLEWARE = [
