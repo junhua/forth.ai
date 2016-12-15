@@ -218,7 +218,9 @@ STATIC_ROOT = '/static/'
 SOCIALACCOUNT_PROVIDERS = \
     {'facebook':
        {'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile', 'user_friends', 'publish_actions'],
+        'SCOPE': ['email', 'public_profile', 'user_friends', 'publish_actions',
+        'manage_pages', 'publish_pages', 'pages_show_list', 'pages_manage_cta'
+        ],
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
         'FIELDS': [
             'id',

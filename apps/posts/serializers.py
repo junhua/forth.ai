@@ -49,7 +49,23 @@ class CreatePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'publish_date', 'status', "type", 
+        fields = ('id', 'publish_date', 'status', "type",
+                'themes', 'keywords', 'content',
+                'owner', 'page'
+                )
+
+        read_only_fields = ('date_created', )
+
+class ShowPostSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    page = serializers.ReadOnlyField(source='page.id')
+
+    publish_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
+    date_created = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
+
+    class Meta:
+        model = Post
+        fields = ('id', 'publish_date', 'status', "type", 'date_created',
                 'themes', 'keywords', 'content',
                 'owner', 'page'
                 )

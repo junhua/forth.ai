@@ -159,7 +159,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = ShowPostSerializer(instance)
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
@@ -179,7 +179,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             filters['status'] = status
 
         posts = Post.objects.filter(**filters)
-        serializer = CreatePostSerializer(posts, many=True)
+        serializer = ShowPostSerializer(posts, many=True)
         
         return Response(serializer.data)
 
@@ -218,6 +218,28 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     #     qs = qs.filter(owner=self.request.user)
     #     return qs
 
+
+
+# def task():
+#     import datetime
+#     time_format = '%Y-%m-%dT%H:%M:%SZ'
+#     time_current = datetime.datetime.now()
+#     last_post = time_current - datetime.timedelta(minutes = 1)
+#     print last_post
+#     #last_post = time.strftime(time_format, last_post)
+#     print time_current, last_post
+
+#     posts = Post.objects.filter( publish_date__range = (last_post, time_current) )
+#     for post in posts:
+#         print '???'
+#         print '=============', post.publish_date
+
+#     x
+
+#     #status = 0
+
+
+
 class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
     serializer_class = PageSerializer
     queryset = Pages.objects.all()
@@ -254,6 +276,9 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 PageUser.objects.create(user=user, page=page_instance)
 
     def list(self, request, *args, **kwargs):
+
+        # task()
+
         user = self.request.user
         print '???? user', user
         self.flush_page(user)
