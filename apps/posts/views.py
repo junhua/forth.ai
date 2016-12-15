@@ -46,11 +46,11 @@ class DefaultsMixin(object):
         filters.OrderingFilter,
     )
 
-def user_access(user):
+def get_user_access(user):
     access =  str(SocialToken.objects.filter(account__user = user)[0])
     return access
 
-def user_id(user):
+def get_user_id(user):
     username = user.username
     User = get_user_model()
     user_id = User.objects.get(username=username)
@@ -69,7 +69,7 @@ def social_post(post_ids):
         post_obj = post[0]
         user_obj = post_obj.owner
         print '===========', user_obj
-        access = user_access(user_obj)
+        access = get_user_access(user_obj)
         content = post_obj.content
         page_obj = post_obj.page
 
@@ -221,13 +221,12 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         return Response('Method not allowed')
 
-
-
     def flush_page(self, user): # get facebook datas
         # facebook page update/create
         print 'get in flush page'
-        access = user_access(user)
-        user_id = user_id(user)   # page-user
+        access = get_user_access(user)
+        print '=============', access
+        user_id = get_user_id(user)
 
         fb = Facebook()
         pages = []
@@ -248,7 +247,7 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
         print '???? user', user
         self.flush_page(user)
 
-        user_id = user_id(user)
+        user_id = get_user_id(user)
         user_pages = PageUser.objects.values_list('page', flat=True).filter(user = user_id)
         pages = Pages.objects.filter(id__in=user_pages) #where in
         serializer = self.get_serializer(pages, many=True)
