@@ -147,7 +147,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             social_post(post_ids)
             posts = Post.objects.filter(id__in=post_ids)
             serializer = self.get_serializer(pages, many=True)
-            response['posts'] += serializer.data
+            response['posts'] = serializer.data
 
 
         headers = self.get_success_headers(serializer.data)
