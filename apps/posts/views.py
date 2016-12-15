@@ -61,6 +61,7 @@ def social_post(post_ids):
     time_current = time.strftime(time_format)
 
     for post_id in post_ids:
+        print post_id
  
         post = Post.objects.filter(id = post_id)
 
@@ -82,7 +83,7 @@ def social_post(post_ids):
                         publish_date = time_current)
             else:
                 print 'post to page', page_obj.uid
-                response = fb.page_post(page_id, access, content)
+                response = fb.page_post(page_obj.uid, access, content)
                 if response.status_code == status_code.HTTP_200_OK:
                     post.update(status = 1, 
                         publish_date = time_current)
@@ -220,24 +221,16 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
 
 
-# def task():
-#     import datetime
-#     time_format = '%Y-%m-%dT%H:%M:%SZ'
-#     time_current = datetime.datetime.now()
-#     last_post = time_current - datetime.timedelta(minutes = 1)
-#     print last_post
-#     #last_post = time.strftime(time_format, last_post)
-#     print time_current, last_post
+def task():
+    from django.utils import timezone
+    time_current = timezone.now()
+    last_post = time_current - datetime.timedelta(minutes = 1)
 
-#     posts = Post.objects.filter( publish_date__range = (last_post, time_current) )
-#     for post in posts:
-#         print '???'
-#         print '=============', post.publish_date
-
-#     x
-
-#     #status = 0
-
+    posts = Post.objects.filter( publish_date__range = (last_post, time_current) )
+    if posts.exists():
+        post_ids = posts.objects.values_list('id', flat=True).filter(status=0)
+        if post_ids:
+            social_post(post_ids)
 
 
 class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
@@ -277,7 +270,7 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
 
-        # task()
+        task()
 
         user = self.request.user
         print '???? user', user

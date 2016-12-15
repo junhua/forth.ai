@@ -62,6 +62,7 @@ class Facebook():
 
 	def page_access(self, page_id, access):
 		page_access_api = settings.FB_HOST + '/%s/access_token' % page_id
+		print 'page url access is----------------', page_access_api
 		params = {
 			'access_token': access
 		}
@@ -77,6 +78,7 @@ class Facebook():
 		}
 
 		url = self.__page_post_api % page_id
+		print 'post page url is----------------', page_access_api
 		response = requests.post(url, params = params)
 		print 'post result is----------------', response
 		return response
