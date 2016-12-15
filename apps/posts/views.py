@@ -77,15 +77,15 @@ def social_post(post_ids):
             if page_obj.type == 0:
                 print 'post to me'
                 response = fb.user_post(access, content)
-
-                post.update(status = 1, 
-                    publish_date = time_current)
+                if response.status_code == status_code.HTTP_200_OK:
+                    post.update(status = 1, 
+                        publish_date = time_current)
             else:
                 print 'post to page', page_obj.uid
                 response = fb.page_post(page_id, access, content)
-                post.update(status = 1, 
-                    publish_date = time_current)
-
+                if response.status_code == status_code.HTTP_200_OK:
+                    post.update(status = 1, 
+                        publish_date = time_current)
 
         elif page_obj.provider == 'google':
             pass
