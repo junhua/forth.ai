@@ -63,8 +63,6 @@ def social_post(post_ids):
     for post_id in post_ids:
  
         post = Post.objects.filter(id = post_id)
-        post.update(status = 1, 
-                    publish_date = time_current)
 
         post_obj = post[0]
         user_obj = post_obj.owner
@@ -78,10 +76,17 @@ def social_post(post_ids):
             fb = Facebook()
             if page_obj.type == 0:
                 print 'post to me'
-                fb.user_post(access, content)
+                response = fb.user_post(access, content)
+
+                post.update(status = 1, 
+                    publish_date = time_current)
             else:
                 print 'post to page', page_obj.uid
-                fb.page_post(page_id, access, content)
+                response = fb.page_post(page_id, access, content)
+                post.update(status = 1, 
+                    publish_date = time_current)
+
+
         elif page_obj.provider == 'google':
             pass
         else:
@@ -133,13 +138,15 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(owner = owner, page = page)
-
-            response['posts'].append(serializer.data)
+            if not publish:
+                response['posts'].append(serializer.data)
             post_ids.append(serializer.data['id'])
             print post_ids
 
         if publish_now:
             social_post(post_ids)
+            posts = Post.objects.filter(id__in=post_ids)
+            response['posts'] += self.get_serializer(pages, many=True)
 
 
         headers = self.get_success_headers(serializer.data)
@@ -223,27 +230,20 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
     def flush_page(self, user): # get facebook datas
         # facebook page update/create
-        print 'get in flush page'
         access = get_user_access(user)
-        print '=============', access
-
         fb = Facebook()
         pages = []
         account = fb.get_me(access)
-        print '============', account, type(account)
         pages.append(account)
 
         if fb.get_pages(access):
             pages += fb.get_pages(access)
 
-        print '**********************', pages
         for page in pages:
             qs = Pages.objects.filter(uid=page['uid'])
             if qs.exists():
-                print 'It has one---------------'
                 qs.update(**page)
             else:
-                print 'create one'
                 Pages.objects.create(**page)
 
             page_instance = Pages.objects.filter(uid=page['uid'])[0]
