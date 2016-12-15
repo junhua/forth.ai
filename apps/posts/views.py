@@ -242,7 +242,7 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
             Pages.objects.create(**page)
 
             page_id = Pages.objects.get(uid=page['uid']).id
-            PageUser.objects.create(user=user_id, page=page_id)
+            PageUser.objects.create(user=user_id, page=page)
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
