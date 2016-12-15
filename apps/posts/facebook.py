@@ -4,8 +4,8 @@ import requests, json
 
 class Facebook():
 	def __init__(self):
-		self.__user_post_api = settings.FB_HOST + '/me/feed'
-		self.__page_post_api = settings.FB_HOST + '/%s/feed'
+		self.__user_post_api = settings.FB_HOST + '/me/feed/'
+		self.__page_post_api = settings.FB_HOST + '/%s/feed/'
 
 		self.__me_base_api = settings.FB_HOST + '/me'
 		self.__pages_api = settings.FB_HOST + '/me/accounts'
@@ -51,11 +51,14 @@ class Facebook():
 		return pages
 
 	def user_post(self, access, message):
+		print '???????????????//in user_post'
 		params = {
 			'message': message,
 			'access_token': access 
 		}
-		requests.post(self.__user_post_api, params = params)
+		response = requests.post(self.__user_post_api, params = params)
+		print 'post result is----------------', response
+		return response
 
 	def page_access(self, page_id, access):
 		page_access_api = settings.FB_HOST + '/%s/access_token' % page_id
@@ -74,4 +77,6 @@ class Facebook():
 		}
 
 		url = self.__page_post_api % page_id
-		requests.post(url, params = params)
+		response = requests.post(url, params = params)
+		print 'post result is----------------', response
+		return response
