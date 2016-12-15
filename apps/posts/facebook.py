@@ -57,7 +57,7 @@ class Facebook():
 			'access_token': access 
 		}
 		response = requests.post(self.__user_post_api, params = params)
-		print 'post result is----------------', response
+		print 'post result is----------------', response, response.content
 		return response
 
 	def page_access(self, page_id, access):
