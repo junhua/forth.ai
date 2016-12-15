@@ -245,8 +245,9 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
             else:
                 print 'create one'
                 Pages.objects.create(**page)
+            page_id = Pages.objects.filter(uid=page['uid']).id
 
-            if not PageUser.objects.filter(user=user, page=page).exist():
+            if not PageUser.objects.filter(user=user.id, page=page_id).exists():
                 PageUser.objects.create(user=user, page=page)
 
     def list(self, request, *args, **kwargs):
