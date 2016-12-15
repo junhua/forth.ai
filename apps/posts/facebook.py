@@ -29,14 +29,14 @@ class Facebook():
 	def get_pages(self, access):
 		pages = []
 
-		url = self.__pages_api + '?access_token=%s' % access
+		url = self.__pages_api + '?fields=id,name,picture&access_token=%s' % access
 		print 'page api is==============', url
 		response = requests.get(url, headers = self.__headers)
 		response = json.loads(response.content)['data']
 		print '??????????????   page respnse', response, type(response)
 		page = {}
 		if response:
-			for data in response[0]:
+			for data in response:
 				print'1111111================ data ==========', data 
 				page['provider'] = 'facebook'
 				page['type'] = 1
