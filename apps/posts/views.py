@@ -53,7 +53,7 @@ def get_user_access(user):
 def get_user_id(user):
     username = user.username
     User = get_user_model()
-    user_id = User.objects.get(username=username)
+    user_id = User.objects.get(username=username).id
     return user_id
 
 def social_post(post_ids):
@@ -226,7 +226,6 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
         print 'get in flush page'
         access = get_user_access(user)
         print '=============', access
-        user_id = get_user_id(user)
 
         fb = Facebook()
         pages = []
@@ -239,10 +238,16 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         print '**********************', pages
         for page in pages:
-            Pages.objects.create(**page)
+            qs = Pages.objects.filter(uid=page['uid'])
+            if qs.exists():
+                print 'It has one---------------'
+                qs.update(**page)
+            else:
+                print 'create one'
+                Pages.objects.create(**page)
 
-            page_id = Pages.objects.get(uid=page['uid']).id
-            PageUser.objects.create(user=user_id, page=page)
+            if not PageUser.objects.filter(user=user, page=page).exist():
+                PageUser.objects.create(user=user, page=page)
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
