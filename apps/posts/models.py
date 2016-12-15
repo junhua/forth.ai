@@ -31,6 +31,7 @@ class Post(models.Model):
 
     publish_date = models.DateTimeField(
         _('date published'),
+        default=timezone.now,
         null=False,
         blank=False,
         help_text=_("The date which the post was posted to social.")
@@ -64,6 +65,7 @@ class Post(models.Model):
         'Pages',
         on_delete=models.CASCADE,
         related_name="post_page",
+        default=1,
         unique=False,
         null=False,
         blank=False,
