@@ -233,7 +233,9 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
         account = fb.get_me(access)
         print '============', account, type(account)
         pages.append(account)
-        pages += fb.get_pages(access)
+
+        if fb.get_pages(access):
+            pages += fb.get_pages(access)
 
         print '**********************', pages
         for page in pages:

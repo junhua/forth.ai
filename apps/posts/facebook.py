@@ -30,21 +30,23 @@ class Facebook():
 		pages = []
 
 		url = self.__pages_api + '?access_token=%s' % access
-                print 'page api is==============', url
+		print 'page api is==============', url
 		response = requests.get(url, headers = self.__headers)
-		response = json.loads(response.content)[0]
+		response = json.loads(response.content)['data'][0]
 		print '??????????????   page respnse', response
-                page = {}
-                if response:
-		        for data in response:
-			      print'1111111================ data ==========', data 
-			page['provider'] = 'facebook'
-			page['type'] = 1
-			page['uid'] = data['id']
-			page['name'] = data['name']
-			page['avatar'] = data['picture']['data']['url']
+		page = {}
+		if response:
+			for data in response:
+				print'1111111================ data ==========', data 
+				page['provider'] = 'facebook'
+				page['type'] = 1
+				page['uid'] = data['id']
+				page['name'] = data['name']
+				page['avatar'] = data['picture']['data']['url']
 
 			pages.append(page)
+		else:
+			return None
 
 		return pages
 
