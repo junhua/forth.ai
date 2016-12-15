@@ -138,7 +138,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(owner = owner, page = page)
-            if not publish:
+            if not publish_now:
                 response['posts'].append(serializer.data)
             post_ids.append(serializer.data['id'])
             print post_ids
@@ -146,7 +146,8 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         if publish_now:
             social_post(post_ids)
             posts = Post.objects.filter(id__in=post_ids)
-            response['posts'] += self.get_serializer(pages, many=True)
+            serializer = self.get_serializer(pages, many=True)
+            response['posts'] += serializer.data
 
 
         headers = self.get_success_headers(serializer.data)
