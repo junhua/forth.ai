@@ -12,9 +12,12 @@ class Facebook():
 		self.__headers = {'Content-Type': 'application/json'}
 
 	def extract_link(self, message):
-		link = re.search("(?P<url>https?://[^\s]+)", message).group("url")
-		print '************ get link????', link
-		return link
+		link = re.search("(?P<url>https?://[^\s]+)", message)
+		if link:
+			return link.group("url")
+
+		else:
+			return None
 
 	def get_me(self, access):
 		me = {}
