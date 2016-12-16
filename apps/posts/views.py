@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import connection
-
+from django.http import HttpResponseForbidden
 
 from rest_framework import (viewsets, 
                             authentication, 
@@ -23,7 +23,6 @@ from allauth.socialaccount.models import SocialToken
 
 from .permissions import IsOwner
 import datetime
-
 
 class DefaultsMixin(object):
 
@@ -99,8 +98,6 @@ def dealwith_content(content):
     return content
 
 class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
-    # TODO: permission: only page in current user's page can post
-
     serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
 
@@ -137,20 +134,21 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
             
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(owner = owner, page = page)
-            if not publish_now:
-                response['posts'].append(serializer.data)
-            post_ids.append(serializer.data['id'])
-            print post_ids
+            if PageUser.objects.filter(user=owner, page=page_id).exists():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(owner = owner, page = page)
+
+                if not publish_now:
+                    response['posts'].append(serializer.data)
+                
+                post_ids.append(serializer.data['id'])
 
         if publish_now:
             social_post(post_ids)
             posts = Post.objects.filter(id__in=post_ids)
             serializer = self.get_serializer(posts, many=True)
             response['posts'] = serializer.data
-
 
         headers = self.get_success_headers(serializer.data)
         return Response(
@@ -161,14 +159,21 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
     @detail_route(methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def existed_post(self, request, pk=None):
+        user = request.user
 
         publish_now = request.data.get('publish_now', None)
 
         if publish_now:
-            print 'pk is ----', pk
             user = self.request.user
             try:
                 post = Post.objects.get(id=pk)
+
+                if not PageUser.objects.filter(user=user, page=post.page).exists():
+                    return Response(
+                        {'detail': 'page does not belong to user'},
+                        status=status_code.HTTP_403_FORBIDDEN
+                    )
+
                 social_post([pk])
                 post = Post.objects.get(id=pk)
             except post.DoesNotExist:
@@ -198,18 +203,28 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
-
-        owner = request.user
+        user = request.user
 
         page_id = request.query_params.get('page', None)
         status = request.query_params.get('status', None)
 
         filters = {}
-        filters['owner'] = owner
-        if page_id:
-            if page_id.isdigit():
-                page_id = int(page_id)
-                filters['page'] = page_id
+
+        if page_id and page_id.isdigit():
+            page_id = int(page_id)
+            filters['page'] = page_id
+
+            if not PageUser.objects.filter(user=user, page=page_id).exists():
+                return Response(
+                    {'detail': 'page does not belong to user'},
+                    status=status_code.HTTP_403_FORBIDDEN
+                )
+        else:
+            return Response(
+                {'detail': 'page id is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+
         if status:
             filters['status'] = status
 
@@ -219,9 +234,17 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        
-        partial = kwargs.pop('partial', False)
+        user = request.user
+
         instance = self.get_object()
+
+        if not PageUser.objects.filter(user=user, page=instance.page).exists():
+            return Response(
+                {'detail': 'page does not belong to user'},
+                status=status_code.HTTP_403_FORBIDDEN
+            )
+
+        partial = kwargs.pop('partial', False)
         serializer = UpdatePostSerializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -288,7 +311,6 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         if fb.get_pages(access):
             pages += fb.get_pages(access)
-            print '================all pages is', pages
 
         for page in pages:
             qs = Pages.objects.filter(uid=page['uid'])
