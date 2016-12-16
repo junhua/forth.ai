@@ -40,10 +40,10 @@ class Facebook():
 				page['uid'] = data['id']
 				page['name'] = data['name']
 				page['avatar'] = data['picture']['data']['url']
-
-			pages.append(page)
+				pages.append(page)
 		else:
 			return None
+		print 'get pages=============', pages
 
 		return pages
 

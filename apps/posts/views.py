@@ -283,6 +283,7 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         if fb.get_pages(access):
             pages += fb.get_pages(access)
+            print '================all pages is', pages
 
         for page in pages:
             qs = Pages.objects.filter(uid=page['uid'])
