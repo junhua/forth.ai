@@ -168,10 +168,15 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             user = self.request.user
             print user
             page_ids = [page['id'] for page in pages]
-
-            social_post( page_ids )
-
-            posts = Post.objects.filter(page__in=page_ids, owner=35)
+            posts = Post.objects.filter(page__in=page_ids, owner=user)
+            if posts.exists():
+                social_post( page_ids )
+            else:
+                return Response(
+                {'detail': 'Post not exist, check your page ids'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+            
             serializer = ShowPostSerializer(posts, many=True)
 
             headers = self.get_success_headers(serializer.data)
