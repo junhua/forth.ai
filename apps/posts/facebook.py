@@ -32,9 +32,10 @@ class Facebook():
 		url = self.__pages_api + '?fields=id,name,picture&access_token=%s' % access
 		response = requests.get(url, headers = self.__headers)
 		response = json.loads(response.content)['data']
-		page = {}
+		
 		if response:
 			for data in response:
+				page = {}
 				page['provider'] = 'facebook'
 				page['type'] = 1
 				page['uid'] = data['id']
