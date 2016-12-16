@@ -171,7 +171,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 post = Post.objects.get(id=pk)
                 social_post(pk)
                 post = Post.objects.get(id=pk)
-            except Exception, e:
+            except post.DoesNotExist:
                 return Response(
                 {'detail': 'Post not exist, check your id'},
                 status=status_code.HTTP_400_BAD_REQUEST
