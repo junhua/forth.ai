@@ -11,7 +11,7 @@ from rest_framework import (viewsets,
                             )
 from rest_framework import status as status_code
 from rest_framework.response import Response
-
+from rest_framework.decorators import detail_route, list_route
 
 from .models import *
 from .serializers import *
@@ -157,6 +157,35 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             status=status_code.HTTP_201_CREATED,
             headers=headers
         )
+
+    @detail_route(methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def existed_post(self, request, pk=None):
+
+        publish_now = request.data.get('publish_now', None)
+        pages = request.data.get('pages', None)
+
+        if publish_now and pages:
+            user = self.request.user
+            print user
+            page_ids = [page['id'] for page in pages]
+
+            social_post( page_ids )
+
+            posts = Post.objects.filter(page__in=page_ids, owner=35)
+            serializer = ShowPostSerializer(posts, many=True)
+
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data,
+                status=status_code.HTTP_201_CREATED,
+                headers=headers
+            )
+        else:
+            return Response(
+                {'detail': 'publish_now or pages field is required, and pages id is not null!'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

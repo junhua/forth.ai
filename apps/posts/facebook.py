@@ -74,7 +74,5 @@ class Facebook():
 		}
 
 		url = self.__page_post_api % page_id
-		print 'post page url is----------------', url
 		response = requests.post(url, params = params)
-		print 'post result is----------------', response, response.content
 		return response
