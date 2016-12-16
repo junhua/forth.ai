@@ -148,7 +148,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         if publish_now:
             social_post(post_ids)
             posts = Post.objects.filter(id__in=post_ids)
-            serializer = self.get_serializer(posts, many=True)
+            serializer = self.get_serializer(posts)
             response['posts'] = serializer.data
 
 
