@@ -30,14 +30,11 @@ class Facebook():
 		pages = []
 
 		url = self.__pages_api + '?fields=id,name,picture&access_token=%s' % access
-		print 'page api is==============', url
 		response = requests.get(url, headers = self.__headers)
 		response = json.loads(response.content)['data']
-		print '??????????????   page respnse', response, type(response)
 		page = {}
 		if response:
 			for data in response:
-				print'1111111================ data ==========', data 
 				page['provider'] = 'facebook'
 				page['type'] = 1
 				page['uid'] = data['id']
@@ -51,22 +48,20 @@ class Facebook():
 		return pages
 
 	def user_post(self, access, message):
-		print '???????????????//in user_post'
 		params = {
 			'message': message,
 			'access_token': access 
 		}
 		response = requests.post(self.__user_post_api, params = params)
-		print 'post result is----------------', response, response.content
 		return response
 
 	def page_access(self, page_id, access):
 		page_access_api = settings.FB_HOST + '/%s?fields=access_token' % page_id
-		print 'page url access is----------------', page_access_api
 		params = {
 			'access_token': access
 		}
-		response = requests.post(page_access_api, params = params)
+		response = requests.get(page_access_api, params = params)
+
 
 		page_access = json.loads(response.content)['access_token']
 		return page_access
@@ -74,11 +69,12 @@ class Facebook():
 	def page_post(self, page_id, access, message):
 		page_access = self.page_access(page_id, access)
 		params = {
+			'message': message,
 			'access_token': page_access
 		}
 
 		url = self.__page_post_api % page_id
-		print 'post page url is----------------', page_access_api
+		print 'post page url is----------------', url
 		response = requests.post(url, params = params)
-		print 'post result is----------------', response
+		print 'post result is----------------', response, response.content
 		return response
