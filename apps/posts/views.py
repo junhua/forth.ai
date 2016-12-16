@@ -148,7 +148,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         if publish_now:
             social_post(post_ids)
             posts = Post.objects.filter(id__in=post_ids)
-            serializer = self.get_serializer(posts)
+            serializer = self.get_serializer(posts, many=True)
             response['posts'] = serializer.data
 
 
@@ -177,7 +177,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
             
-            serializer = ShowPostSerializer(post, many=True)
+            serializer = ShowPostSerializer(post)
 
             headers = self.get_success_headers(serializer.data)
             return Response(
