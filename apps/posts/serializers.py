@@ -28,3 +28,65 @@ class RepostSerializer(serializers.ModelSerializer):
 
     # def create(self, validated_data):
         # return Post.objects.create(**validated_data)
+
+class UpdatePostSerializer(serializers.ModelSerializer):
+    #owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Post
+        fields = ('id', 'publish_date',
+                'themes', 'keywords', 'content',
+                #'owner'
+                )
+
+        read_only_fields = ('date_created', )
+
+class CreatePostSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    page = serializers.ReadOnlyField(source='page.id')
+
+    publish_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
+
+    class Meta:
+        model = Post
+        fields = ('id', 'publish_date', 'status', "type",
+                'themes', 'keywords', 'content',
+                'owner', 'page'
+                )
+
+        read_only_fields = ('date_created', )
+
+class ShowPostSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    page = serializers.ReadOnlyField(source='page.id')
+
+    publish_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
+    date_created = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")
+
+    class Meta:
+        model = Post
+        fields = ('id', 'publish_date', 'status', "type", 'date_created',
+                'themes', 'keywords', 'content',
+                'owner', 'page'
+                )
+
+        read_only_fields = ('date_created', )
+
+class PageSerializer(serializers.ModelSerializer):
+    # extra_data = JSONField(binary=True)
+    class Meta:
+        model = Pages
+        fields = ('id', 'uid', 'name', 'avatar', 'provider', 
+            'type', 'extra_data')
+
+class ShowPageSerializer(serializers.ModelSerializer):
+    # extra_data = JSONField(binary=True)
+    class Meta:
+        model = Pages
+        fields = ('id', 'uid', 'name', 'avatar', 'provider', 
+            'type', 'extra_data')
+
+class PageUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PageUser
+        fields = ('id', 'user', 'page')

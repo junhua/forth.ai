@@ -10,8 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-import os
-import celery
+import os,datetime,celery
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,6 +62,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.github',
+    # 'django_facebook',
 
 
     # apps
@@ -105,6 +105,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
 
+                # 'django_facebook.context_processors.facebook',
+                # 'django.core.context_processors.request',
 
             ],
         },
@@ -124,7 +126,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'HOST': 'db',
-        'PORT': 5432,
+        'PORT': '5432',
     }
 }
 
@@ -212,6 +214,39 @@ REST_SESSION_LOGIN = False
 
 
 STATIC_ROOT = '/static/'
+
+SOCIALACCOUNT_PROVIDERS = \
+    {'facebook':
+       {'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile', 'user_friends', 'publish_actions',
+        'manage_pages', 'publish_pages', 'pages_show_list', 'pages_manage_cta'
+        ],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time'],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': 'path.to.callable',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v2.4'}}
+
+FB_HOST = os.environ['FB_HOST']
+# FACEBOOK_APP_ID = 544544612409281
+# FACEBOOK_APP_SECRET = 'd8f0b20e9d8f7c06a317d658723f5c38'
+
+# https://github.com/Tivix/django-rest-auth/issues/122
+JWT_AUTH = {
+'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
 
 # CELERY STUFF
 BROKER_URL = 'redis://localhost:6379'
