@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework.views import APIView
-import requests, json
+import requests, json, re
 
 class Facebook():
 	def __init__(self):

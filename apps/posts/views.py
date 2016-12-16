@@ -124,22 +124,18 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         owner = request.user
 
-        if 'pages' in request.data:
-            pages = request.data['pages']
+        if 'page_id' in request.data:
+            pages = request.data['page_id']
         else:
             return Response(
                 {'detail': 'pages field is required'},
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
-        is_published = False
         if 'publish_now' in request.data:
             publish_now = request.data['publish_now']# True  
         else:
-            return Response(
-                {'detail': 'publish_now field is required'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
+            publish_now = False
 
         response = {}
         response['posts'] = []
@@ -208,11 +204,6 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_201_CREATED,
                 headers=headers
             )
-        else:
-            return Response(
-                {'detail': 'publish_now'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -222,7 +213,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         user = request.user
 
-        page_id = request.query_params.get('page', None)
+        page_id = request.query_params.get('page_id', None)
         status = request.query_params.get('status', None)
 
         filters = {}
