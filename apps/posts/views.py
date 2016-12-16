@@ -97,6 +97,26 @@ def dealwith_content(content):
     # TODO: dedalwith content
     return content
 
+class AutoViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RepostSerializer
+    queryset = Post.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        from django.utils import timezone
+        time_current = timezone.now()
+        last_post = time_current + datetime.timedelta(minutes = 1)
+        print '=====', time_current, last_post
+
+        post_ids = self.queryset.values_list('id', flat=True).filter(
+                            publish_date__range=(time_current, last_post),
+                            status=0)
+        print '***********', post_ids
+        if post_ids:
+            print 'social post------------'
+            social_post(post_ids)
+        return Response({'detail': post_ids})
+
 class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
@@ -194,7 +214,6 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
-
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = ShowPostSerializer(instance)
@@ -276,16 +295,6 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
 
 
-def task():
-    from django.utils import timezone
-    time_current = timezone.now()
-    last_post = time_current - datetime.timedelta(minutes = 1)
-
-    posts = Post.objects.filter( publish_date__range = (last_post, time_current) )
-    if posts.exists():
-        post_ids = posts.objects.values_list('id', flat=True).filter(status=0)
-        if post_ids:
-            social_post(post_ids)
 
 
 class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
