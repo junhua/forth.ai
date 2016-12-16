@@ -163,27 +163,21 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def existed_post(self, request, pk=None):
 
         publish_now = request.data.get('publish_now', None)
-        pages = request.data.get('pages', None)
 
-        if publish_now and pages:
+        if publish_now:
+            print 'pk is ----', pk
             user = self.request.user
-            print user
-            page_ids = [page['id'] for page in pages]
-            posts = Post.objects.filter(page__in=page_ids, owner=user, status=0)
-
-            print 'post is ----------------page id----owner --', page_ids, user, posts
-            post_ids = [post.id for post in posts]
-            print 'will post those', post_ids
-
-            if posts.exists():
-                social_post(post_ids)
-            else:
+            try:
+                post = Post.objects.get(id=pk)
+                social_post([pk])
+                post = Post.objects.get(id=pk)
+            except post.DoesNotExist:
                 return Response(
-                {'detail': 'Post not exist, check your page ids'},
+                {'detail': 'Post not exist, check your id'},
                 status=status_code.HTTP_400_BAD_REQUEST
             )
             
-            serializer = ShowPostSerializer(posts, many=True)
+            serializer = ShowPostSerializer(post)
 
             headers = self.get_success_headers(serializer.data)
             return Response(
@@ -193,7 +187,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             )
         else:
             return Response(
-                {'detail': 'publish_now or pages field is required, and pages id is not null!'},
+                {'detail': 'publish_now'},
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
