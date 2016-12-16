@@ -67,7 +67,7 @@ def social_post(post_ids):
 
         post_obj = post[0]
         user_obj = post_obj.owner
-        print '===========', user_obj
+
         access = get_user_access(user_obj)
         content = post_obj.content
         page_obj = post_obj.page
@@ -269,11 +269,7 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 PageUser.objects.create(user=user, page=page_instance)
 
     def list(self, request, *args, **kwargs):
-
-        task()
-
         user = self.request.user
-        print '???? user', user
         self.flush_page(user)
 
         user_id = get_user_id(user)
