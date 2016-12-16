@@ -61,9 +61,10 @@ def social_post(post_ids):
     time_current = time.strftime(time_format)
 
     for post_id in post_ids:
-        print post_id
+        print 'tho', post_id
  
         post = Post.objects.filter(id = post_id)
+        print 'get post is------???', post
 
         post_obj = post[0]
         user_obj = post_obj.owner
@@ -169,6 +170,10 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             print user
             page_ids = [page['id'] for page in pages]
             posts = Post.objects.filter(page__in=page_ids, owner=user)
+
+            print 'post is ----------------page id----owner --', page_ids, owner, posts
+            print [post.id for post in posts]
+
             if posts.exists():
                 social_post( page_ids )
             else:
@@ -200,12 +205,12 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         owner = request.user
-        username = owner.username
 
         page_id = request.query_params.get('page', None)
         status = request.query_params.get('status', None)
 
         filters = {}
+        filters['owner'] = owner
         if page_id:
             if page_id.isdigit():
                 page_id = int(page_id)
