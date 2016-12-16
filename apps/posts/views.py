@@ -170,7 +170,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             print user
             post = Post.objects.get(id=pk)
 
-            if posts.exists():
+            if post.exists():
                 #social_post(pk)
                 post = Post.objects.get(id=pk)
             else:
