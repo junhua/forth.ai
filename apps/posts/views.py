@@ -169,7 +169,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             user = self.request.user
             try:
                 post = Post.objects.get(id=pk)
-                social_post(pk)
+                social_post([pk])
                 post = Post.objects.get(id=pk)
             except post.DoesNotExist:
                 return Response(
