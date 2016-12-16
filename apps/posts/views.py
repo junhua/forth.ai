@@ -124,8 +124,8 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         owner = request.user
 
-        if 'page_id' in request.data:
-            pages = request.data['page_id']
+        if 'pages' in request.data:
+            pages = request.data['pages']
         else:
             return Response(
                 {'detail': 'pages field is required'},
