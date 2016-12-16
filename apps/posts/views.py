@@ -167,15 +167,13 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         if publish_now:
             print 'pk is ----', pk
             user = self.request.user
-            print user
-            post = Post.objects.get(id=pk)
-
-            if post.exists():
-                #social_post(pk)
+            try:
                 post = Post.objects.get(id=pk)
-            else:
+                social_post(pk)
+                post = Post.objects.get(id=pk)
+            except Exception, e:
                 return Response(
-                {'detail': 'Post not exist, check your page ids'},
+                {'detail': 'Post not exist, check your id'},
                 status=status_code.HTTP_400_BAD_REQUEST
             )
             
