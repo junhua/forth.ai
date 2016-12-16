@@ -150,11 +150,9 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(posts, many=True)
             response['posts'] = serializer.data
 
-        headers = self.get_success_headers(serializer.data)
         return Response(
             response,
-            status=status_code.HTTP_201_CREATED,
-            headers=headers
+            status=status_code.HTTP_201_CREATED
         )
 
     @detail_route(methods=['post'], permission_classes=[permissions.IsAuthenticated])

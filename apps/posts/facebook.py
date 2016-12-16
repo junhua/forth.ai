@@ -11,6 +11,11 @@ class Facebook():
 		self.__pages_api = settings.FB_HOST + '/me/accounts'
 		self.__headers = {'Content-Type': 'application/json'}
 
+	def extract_link(self, message):
+		link = re.search("(?P<url>https?://[^\s]+)", message).group("url")
+		print '************ get link????', link
+		return link
+
 	def get_me(self, access):
 		me = {}
 		me['provider'] = 'facebook'
@@ -49,10 +54,14 @@ class Facebook():
 		return pages
 
 	def user_post(self, access, message):
+		
 		params = {
 			'message': message,
 			'access_token': access 
 		}
+		link = self.extract_link(message)
+		if link:
+			params['link'] = link
 		response = requests.post(self.__user_post_api, params = params)
 		return response
 
@@ -73,6 +82,9 @@ class Facebook():
 			'message': message,
 			'access_token': page_access
 		}
+		link = self.extract_link(message)
+		if link:
+			params['link'] = link
 
 		url = self.__page_post_api % page_id
 		response = requests.post(url, params = params)
