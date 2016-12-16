@@ -169,13 +169,14 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             user = self.request.user
             print user
             page_ids = [page['id'] for page in pages]
-            posts = Post.objects.filter(page__in=page_ids, owner=user)
+            posts = Post.objects.filter(page__in=page_ids, owner=user, status=0)
 
-            print 'post is ----------------page id----owner --', page_ids, owner, posts
-            print [post.id for post in posts]
+            print 'post is ----------------page id----owner --', page_ids, user, posts
+            post_ids = [post.id for post in posts]
+            print 'will post those', post_ids
 
             if posts.exists():
-                social_post( page_ids )
+                social_post(post_ids)
             else:
                 return Response(
                 {'detail': 'Post not exist, check your page ids'},
