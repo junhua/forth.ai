@@ -117,7 +117,7 @@ class Post(models.Model):
     # )
 
     class Meta:
-        ordering = ['date_created']
+        ordering = ['publish_date']
 
 class Pages(models.Model):
 
