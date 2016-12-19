@@ -58,7 +58,7 @@ Body
 
 
 ## Publish an existing post
-**POST /v1/posts/{id}/**  
+**POST /v1/posts/{id}/existed_post**  
 
 Headers  
 Authorization: "jwt token_retrieved"

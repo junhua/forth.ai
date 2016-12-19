@@ -204,6 +204,10 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_201_CREATED,
                 headers=headers
             )
+        return Response(
+            {'detail': 'publish_now is required'},
+            status=status_code.HTTP_400_BAD_REQUEST
+        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
