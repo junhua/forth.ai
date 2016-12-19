@@ -141,7 +141,7 @@ class Pages(models.Model):
 
     avatar = models.URLField(
         _("url"),
-        max_length=200,
+        max_length=500,
         blank=True,
         null=True,
         help_text=_(
