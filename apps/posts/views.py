@@ -217,7 +217,7 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         user = request.user
 
-        page_id = request.query_params.get('page_id', None)
+        page_id = request.query_params.get('page', None)
         status = request.query_params.get('status', None)
 
         filters = {}

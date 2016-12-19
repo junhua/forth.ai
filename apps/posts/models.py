@@ -119,6 +119,9 @@ class Post(models.Model):
     class Meta:
         ordering = ['publish_date']
 
+    def __str__(self):
+        return "id:%s content: %s page: %s" % (self.id, self.content, self.page)
+
 class Pages(models.Model):
 
     uid = models.CharField(
@@ -161,7 +164,9 @@ class Pages(models.Model):
     extra_data = models.TextField(
         verbose_name=_('extra data'), 
         default=dict
-    ) 
+    )
+    def __str__(self):
+        return "id:%s uid: %s name: %s" % (self.id, self.uid, self.name)
 
 
 class PageUser(models.Model):
