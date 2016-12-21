@@ -92,7 +92,7 @@ Body
 ```
 
 
-## Retrive List
+## Retrieve List
 **GET /v1/posts?status=0&page=1**
 
 Headers  
@@ -239,16 +239,8 @@ Body
 ```
 
 
-## Retrive 
-**POST /v1/link/**  
-
-Body
-```json
-{
-    "url": "http://haipo1023.baijia.baidu.com/article/730304"
-}
-```
-
+## Retrive url preview
+**GET /v1/link?url={url}**
 
 **Response**
 

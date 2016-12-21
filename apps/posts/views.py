@@ -309,7 +309,19 @@ class LinkViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Pages.objects.all()
 
     def create(self, request, *args, **kwargs):
-        response = self.client.oembed(request.data.get('url', None))
+        return Response('Method not allowed')
+    def update(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+    def destroy(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+
+    def list(self, request, *args, **kwargs):
+        try:
+            response = self.client.oembed( request.query_params.get('url', None))
+        except Exception, e:
+            return Response('Error occured %s' % e.message ,
+                status=HTTP_500_INTERNAL_SERVER_ERROR)
+
         print '==========', response
 
 
@@ -331,18 +343,6 @@ class LinkViewSet(DefaultsMixin, viewsets.ModelViewSet):
             data,
             status=status_code.HTTP_200_OK
         )
-
-    def update(self, request, *args, **kwargs):
-        return Response('Method not allowed')
-    def destroy(self, request, *args, **kwargs):
-        return Response('Method not allowed')
-    def list(self, request, *args, **kwargs):
-        return Response('Method not allowed')
-        
-
-
-
-
 
         # url = 'https://scraper.buffer.com/'
 
