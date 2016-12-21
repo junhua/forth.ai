@@ -121,6 +121,8 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
 
+
+
     def create(self, request, *args, **kwargs):
         owner = request.user
 
@@ -209,6 +211,9 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             status=status_code.HTTP_400_BAD_REQUEST
         )
 
+
+
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = ShowPostSerializer(instance)
@@ -287,6 +292,70 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     #     qs = super(FileUploaderViewSet, self).get_queryset(*args, **kwargs)
     #     qs = qs.filter(owner=self.request.user)
     #     return qs
+
+
+class LinkViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    # use package: https://github.com/embedly/embedly-python
+
+    from embedly import Embedly
+
+    #key = '3e8712ffd43c4140baafe1d986c16248'
+    key = 'internal'
+
+    client = Embedly(key)
+
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PageSerializer
+    queryset = Pages.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        response = self.client.oembed(request.data.get('url', None))
+        print '==========', response
+
+
+        data = {
+            'origin_url':response.get('url',None),
+            'title':response.get('title',None),
+            'description':response.get('description',None),
+            'images':[
+                {
+                    'url':response.get('thumbnail_url',None),
+                    'width':response.get('thumbnail_width',None),
+                    'height':response.get('thumbnail_height',None),
+                    # 'type':response.get('thumbnail_width',None),
+                }
+            ]
+        }
+
+        return Response(
+            data,
+            status=status_code.HTTP_200_OK
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+    def destroy(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+    def list(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+        
+
+
+
+
+
+        # url = 'https://scraper.buffer.com/'
+
+        # params = {
+        #     'url': request.data.get('url', None)
+        # }
+
+        # response = requests.get(url=api, params=params)
+        # response = json.loads(response.content)
+
+        
+
+
 
 
 
