@@ -60,10 +60,8 @@ def social_post(post_ids):
     time_current = time.strftime(time_format)
 
     for post_id in post_ids:
-        print 'tho', post_id
  
         post = Post.objects.filter(id = post_id)
-        print 'get post is------???', post
 
         post_obj = post[0]
         user_obj = post_obj.owner
@@ -73,16 +71,13 @@ def social_post(post_ids):
         page_obj = post_obj.page
 
         if page_obj.provider == 'facebook':
-            print 'post to facebook'
             fb = Facebook()
             if page_obj.type == 0:
-                print 'post to me'
                 response = fb.user_post(access, content)
                 if response.status_code == status_code.HTTP_200_OK:
                     post.update(status = 1, 
                         publish_date = time_current)
             else:
-                print 'post to page', page_obj.uid
                 response = fb.page_post(page_obj.uid, access, content)
                 if response.status_code == status_code.HTTP_200_OK:
                     post.update(status = 1, 
@@ -106,14 +101,11 @@ class AutoViewSet(viewsets.ModelViewSet):
         from django.utils import timezone
         time_current = timezone.now()
         last_post = time_current + datetime.timedelta(minutes = 1)
-        print '=====', time_current, last_post
 
         post_ids = self.queryset.values_list('id', flat=True).filter(
                             publish_date__range=(time_current, last_post),
                             status=0)
-        print '***********', post_ids
         if post_ids:
-            print 'social post------------'
             social_post(post_ids)
         return Response({'detail': post_ids})
 

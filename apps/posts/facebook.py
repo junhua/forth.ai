@@ -52,7 +52,6 @@ class Facebook():
 				pages.append(page)
 		else:
 			return None
-		print 'get pages=============', pages
 
 		return pages
 
