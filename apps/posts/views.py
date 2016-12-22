@@ -21,7 +21,6 @@ import requests, json
 import time
 from allauth.socialaccount.models import SocialToken
 
-from .permissions import IsOwner
 import datetime
 
 class DefaultsMixin(object):
