@@ -1,15 +1,24 @@
- version: '2'
- services:
-   db:
-     image: postgres
-     ports:
-       - "5055:5432"
-   web:
-     build: .
-     command: python manage.py runserver 0.0.0.0:8000
-     volumes:
-       - .:/code
-     ports:
-       - "8088:8000"
-     depends_on:
-       - db
+version: '2'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5055:5432"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8088:8000"
+    depends_on:
+      - db
+
+  redis:
+    restart: always
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - .:/data

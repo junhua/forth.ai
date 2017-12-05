@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-import os,datetime
+import os,datetime,celery
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,11 +68,12 @@ INSTALLED_APPS = [
     # apps
     'api',
     'apps.posts',
-    'forth_ai_backend.oauth'
+    'forth_ai_backend.oauth',
     # 'django-filter',
     
-
-
+    # celery
+    'djcelery',
+    'kombu.transport.django',
 ]
 
 MIDDLEWARE = [
@@ -214,7 +215,6 @@ REST_SESSION_LOGIN = False
 
 STATIC_ROOT = '/static/'
 
-
 SOCIALACCOUNT_PROVIDERS = \
     {'facebook':
        {'METHOD': 'oauth2',
@@ -247,3 +247,11 @@ FB_HOST = os.environ['FB_HOST']
 JWT_AUTH = {
 'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+
+# CELERY STUFF
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Singapore'
