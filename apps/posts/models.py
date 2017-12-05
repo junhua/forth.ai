@@ -117,7 +117,10 @@ class Post(models.Model):
     # )
 
     class Meta:
-        ordering = ['date_created']
+        ordering = ['publish_date']
+
+    def __str__(self):
+        return "id:%s content: %s page: %s" % (self.id, self.content, self.page)
 
 class Pages(models.Model):
 
@@ -141,7 +144,7 @@ class Pages(models.Model):
 
     avatar = models.URLField(
         _("url"),
-        max_length=200,
+        max_length=500,
         blank=True,
         null=True,
         help_text=_(
@@ -161,7 +164,9 @@ class Pages(models.Model):
     extra_data = models.TextField(
         verbose_name=_('extra data'), 
         default=dict
-    ) 
+    )
+    def __str__(self):
+        return "id:%s uid: %s name: %s" % (self.id, self.uid, self.name)
 
 
 class PageUser(models.Model):

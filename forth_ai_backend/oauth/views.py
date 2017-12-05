@@ -49,7 +49,7 @@ def detail(request):
 
 	detail = json.loads(login_token(provider, access))
 	jwt = detail.get('token', None)
-	
+  
 	url = '%s/%s/login' %(settings.FRONTEND_BASE_URL, provider)
 	response = HttpResponseRedirect(url, jwt)
 	response.set_cookie('jwt', value = jwt, domain = settings.SESSION_COOKIE_DOMAIN)

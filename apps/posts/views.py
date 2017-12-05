@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import connection
-
+from django.http import HttpResponseForbidden
 
 from rest_framework import (viewsets, 
                             authentication, 
@@ -21,9 +21,7 @@ import requests, json
 import time
 from allauth.socialaccount.models import SocialToken
 
-from .permissions import IsOwner
 import datetime
-
 
 class DefaultsMixin(object):
 
@@ -61,10 +59,8 @@ def social_post(post_ids):
     time_current = time.strftime(time_format)
 
     for post_id in post_ids:
-        print 'tho', post_id
  
         post = Post.objects.filter(id = post_id)
-        print 'get post is------???', post
 
         post_obj = post[0]
         user_obj = post_obj.owner
@@ -74,16 +70,13 @@ def social_post(post_ids):
         page_obj = post_obj.page
 
         if page_obj.provider == 'facebook':
-            print 'post to facebook'
             fb = Facebook()
             if page_obj.type == 0:
-                print 'post to me'
                 response = fb.user_post(access, content)
                 if response.status_code == status_code.HTTP_200_OK:
                     post.update(status = 1, 
                         publish_date = time_current)
             else:
-                print 'post to page', page_obj.uid
                 response = fb.page_post(page_obj.uid, access, content)
                 if response.status_code == status_code.HTTP_200_OK:
                     post.update(status = 1, 
@@ -98,11 +91,28 @@ def dealwith_content(content):
     # TODO: dedalwith content
     return content
 
-class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
-    # TODO: permission: only page in current user's page can post
+class AutoViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RepostSerializer
+    queryset = Post.objects.all()
 
+    def list(self, request, *args, **kwargs):
+        from django.utils import timezone
+        time_current = timezone.now()
+        last_post = time_current + datetime.timedelta(minutes = 1)
+
+        post_ids = self.queryset.values_list('id', flat=True).filter(
+                            publish_date__range=(time_current, last_post),
+                            status=0)
+        if post_ids:
+            social_post(post_ids)
+        return Response({'detail': post_ids})
+
+class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     serializer_class = CreatePostSerializer
     queryset = Post.objects.all()
+
+
 
     def create(self, request, *args, **kwargs):
         owner = request.user
@@ -115,14 +125,10 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
 
-        is_published = False
         if 'publish_now' in request.data:
             publish_now = request.data['publish_now']# True  
         else:
-            return Response(
-                {'detail': 'publish_now field is required'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
+            publish_now = False
 
         response = {}
         response['posts'] = []
@@ -137,13 +143,15 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_400_BAD_REQUEST
             )
             
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(owner = owner, page = page)
-            if not publish_now:
-                response['posts'].append(serializer.data)
-            post_ids.append(serializer.data['id'])
-            print post_ids
+            if PageUser.objects.filter(user=owner, page=page_id).exists():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(owner = owner, page = page)
+
+                if not publish_now:
+                    response['posts'].append(serializer.data)
+                
+                post_ids.append(serializer.data['id'])
 
         if publish_now:
             social_post(post_ids)
@@ -151,24 +159,28 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(posts, many=True)
             response['posts'] = serializer.data
 
-
-        headers = self.get_success_headers(serializer.data)
         return Response(
             response,
-            status=status_code.HTTP_201_CREATED,
-            headers=headers
+            status=status_code.HTTP_201_CREATED
         )
 
     @detail_route(methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def existed_post(self, request, pk=None):
+        user = request.user
 
         publish_now = request.data.get('publish_now', None)
 
         if publish_now:
-            print 'pk is ----', pk
             user = self.request.user
             try:
                 post = Post.objects.get(id=pk)
+
+                if not PageUser.objects.filter(user=user, page=post.page).exists():
+                    return Response(
+                        {'detail': 'page does not belong to user'},
+                        status=status_code.HTTP_403_FORBIDDEN
+                    )
+
                 social_post([pk])
                 post = Post.objects.get(id=pk)
             except post.DoesNotExist:
@@ -185,11 +197,12 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
                 status=status_code.HTTP_201_CREATED,
                 headers=headers
             )
-        else:
-            return Response(
-                {'detail': 'publish_now'},
-                status=status_code.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            {'detail': 'publish_now is required'},
+            status=status_code.HTTP_400_BAD_REQUEST
+        )
+
+
 
 
     def retrieve(self, request, *args, **kwargs):
@@ -198,18 +211,28 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
-
-        owner = request.user
+        user = request.user
 
         page_id = request.query_params.get('page', None)
         status = request.query_params.get('status', None)
 
         filters = {}
-        filters['owner'] = owner
-        if page_id:
-            if page_id.isdigit():
-                page_id = int(page_id)
-                filters['page'] = page_id
+
+        if page_id and page_id.isdigit():
+            page_id = int(page_id)
+            filters['page'] = page_id
+
+            if not PageUser.objects.filter(user=user, page=page_id).exists():
+                return Response(
+                    {'detail': 'page does not belong to user'},
+                    status=status_code.HTTP_403_FORBIDDEN
+                )
+        else:
+            return Response(
+                {'detail': 'page id is required'},
+                status=status_code.HTTP_400_BAD_REQUEST
+            )
+
         if status:
             filters['status'] = status
 
@@ -219,9 +242,17 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        
-        partial = kwargs.pop('partial', False)
+        user = request.user
+
         instance = self.get_object()
+
+        if not PageUser.objects.filter(user=user, page=instance.page).exists():
+            return Response(
+                {'detail': 'page does not belong to user'},
+                status=status_code.HTTP_403_FORBIDDEN
+            )
+
+        partial = kwargs.pop('partial', False)
         serializer = UpdatePostSerializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -254,17 +285,71 @@ class PostViewSet(DefaultsMixin, viewsets.ModelViewSet):
     #     return qs
 
 
+class LinkViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    # use package: https://github.com/embedly/embedly-python
 
-def task():
-    from django.utils import timezone
-    time_current = timezone.now()
-    last_post = time_current - datetime.timedelta(minutes = 1)
+    from embedly import Embedly
 
-    posts = Post.objects.filter( publish_date__range = (last_post, time_current) )
-    if posts.exists():
-        post_ids = posts.objects.values_list('id', flat=True).filter(status=0)
-        if post_ids:
-            social_post(post_ids)
+    #key = '3e8712ffd43c4140baafe1d986c16248'
+    key = 'internal'
+
+    client = Embedly(key)
+
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PageSerializer
+    queryset = Pages.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+    def update(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+    def destroy(self, request, *args, **kwargs):
+        return Response('Method not allowed')
+
+    def list(self, request, *args, **kwargs):
+        try:
+            response = self.client.oembed( request.query_params.get('url', None))
+        except Exception, e:
+            return Response('Error occured %s' % e.message ,
+                status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+        print '==========', response
+
+
+        data = {
+            'origin_url':response.get('url',None),
+            'title':response.get('title',None),
+            'description':response.get('description',None),
+            'images':[
+                {
+                    'url':response.get('thumbnail_url',None),
+                    'width':response.get('thumbnail_width',None),
+                    'height':response.get('thumbnail_height',None),
+                    # 'type':response.get('thumbnail_width',None),
+                }
+            ]
+        }
+
+        return Response(
+            data,
+            status=status_code.HTTP_200_OK
+        )
+
+        # url = 'https://scraper.buffer.com/'
+
+        # params = {
+        #     'url': request.data.get('url', None)
+        # }
+
+        # response = requests.get(url=api, params=params)
+        # response = json.loads(response.content)
+
+        
+
+
+
+
+
 
 
 class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
@@ -288,7 +373,6 @@ class PageViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         if fb.get_pages(access):
             pages += fb.get_pages(access)
-            print '================all pages is', pages
 
         for page in pages:
             qs = Pages.objects.filter(uid=page['uid'])

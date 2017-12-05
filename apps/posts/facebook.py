@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework.views import APIView
-import requests, json
+import requests, json, re
 
 class Facebook():
 	def __init__(self):
@@ -10,6 +10,14 @@ class Facebook():
 		self.__me_base_api = settings.FB_HOST + '/me'
 		self.__pages_api = settings.FB_HOST + '/me/accounts'
 		self.__headers = {'Content-Type': 'application/json'}
+
+	def extract_link(self, message):
+		link = re.search("(?P<url>https?://[^\s]+)", message)
+		if link:
+			return link.group("url")
+
+		else:
+			return None
 
 	def get_me(self, access):
 		me = {}
@@ -44,15 +52,18 @@ class Facebook():
 				pages.append(page)
 		else:
 			return None
-		print 'get pages=============', pages
 
 		return pages
 
 	def user_post(self, access, message):
+		
 		params = {
 			'message': message,
 			'access_token': access 
 		}
+		link = self.extract_link(message)
+		if link:
+			params['link'] = link
 		response = requests.post(self.__user_post_api, params = params)
 		return response
 
@@ -73,6 +84,9 @@ class Facebook():
 			'message': message,
 			'access_token': page_access
 		}
+		link = self.extract_link(message)
+		if link:
+			params['link'] = link
 
 		url = self.__page_post_api % page_id
 		response = requests.post(url, params = params)
