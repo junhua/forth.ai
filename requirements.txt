@@ -15,3 +15,4 @@ django-filter==1.0.0
 django-dotenv==1.4.1
 markdown==2.6.7
 mock==2.0.0
+Embedly==0.5.0
